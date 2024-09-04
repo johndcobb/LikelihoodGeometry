@@ -7,18 +7,16 @@
 ---------------------------------------------------------------------------
 newPackage("LikelihoodGeometry",
     Version => "0.1",
-    Date => "",
+    Date => "4 September 2024",
     Authors => {
 	{Name => "John Cobb", Email => "jcobb2@wisc.edu", HomePage => "https://johndcobb.github.io"}
     --Add your information here.
     },
     Headline => "Methods for computing likelihood geometry of discrete statistical models",
     Keywords => {"Commutative Algebra, Algebraic Statistics, Discrete Statistical Models, Likelihood Geometry"},
+    PackageImports => {"Elimination", "Quasidegrees", "NormalToricVarieties"},
     DebuggingMode => true --turn to false when submitting
     )
-
-needsPackage("Elimination")
-needsPackage("Quasidegrees")
 
 export{
     -- Types
@@ -73,3 +71,6 @@ installPackage "LikelihoodGeometry"
 check LikelihoodGeometry
 
 debug needsPackage "LikelihoodGeometry";
+
+A = matrix{{1,1,0,0},{0,0,1,1}, {1,0,1,0}, {0,1,0,1}}
+toricModel A
