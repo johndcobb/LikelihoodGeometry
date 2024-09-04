@@ -6,7 +6,6 @@ This repo contains:
 
 - LCCode.m2 contains the code to run the examples that show up in the paper [Likelihood Correspondence of Statistical Models](https://arxiv.org/pdf/2312.08501.pdf). 
 
-- developmentsection.m2 which we are using to test new functions prior to putting them into the package.
 
 To create documentation, it is probably helpful to view this page: [https://macaulay2.com/doc/Macaulay2/share/doc/Macaulay2/SimpleDoc/html/_doc__Example.html](https://macaulay2.com/doc/Macaulay2/share/doc/Macaulay2/SimpleDoc/html/_doc__Example.html).
 
