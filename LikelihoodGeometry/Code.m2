@@ -18,6 +18,22 @@ generateStates = (arities) -> (
     rsort(toList(combinations))
 );
 
+makeLogLinearMatrix = method()
+makeLogLinearMatrix(List, List) := Matrix => (generatingSubsets, discreteRandomVariables) -> (
+    -- expecting the GeneratingSubsets to be a list containing sets of integers which index discreteRandomVariables
+    -- expecting discreteRandomVariables to be a list of numbers which describe the arity of the random variables -- e.g. (2,2,2,2) for 4 binary random variables
+
+    allStates = generateStates(discreteRandomVariables);
+    matrixList = {};
+    for g in generatingSubsets do (
+        gStates = generateStates(discreteRandomVariables_g);
+        for gState in gStates do (
+            gRow = apply(apply(allStates, state -> state_g == gState), b -> if b then 1 else 0);
+            matrixList = matrixList | {gRow};
+        );
+    );
+    matrix matrixList
+)
 
 
 --------------------------------------------------------------------
