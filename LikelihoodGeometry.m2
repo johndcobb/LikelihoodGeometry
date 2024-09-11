@@ -14,13 +14,14 @@ newPackage("LikelihoodGeometry",
     },
     Headline => "Methods for computing likelihood geometry of discrete statistical models",
     Keywords => {"Commutative Algebra, Algebraic Statistics, Discrete Statistical Models, Likelihood Geometry"},
+    PackageExports => {"GraphicalModels"},
     PackageImports => {"Elimination", "Quasidegrees", "NormalToricVarieties"},
     DebuggingMode => true --turn to false when submitting
     )
 
 export{
     -- Types
-
+    "ToricModel",
     -- Functions/Methods
     "LCRing",
     "computeIndependenceLC",
