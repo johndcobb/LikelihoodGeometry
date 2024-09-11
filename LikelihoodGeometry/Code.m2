@@ -9,8 +9,8 @@ ReverseDictionary = value Core#"private dictionary"#"ReverseDictionary";
 --------------------------------------------------------------------
 
 -- Function to generate all states of a list of discrete random variables given a list of arities
+cartesianProd = (A, B) -> (A**B);
 generateStates = (arities) -> (
-    cartesianProd = (A, B) -> (A**B);
     -- Generate the list of sets of all values each variable can take
     valueSets = apply(arities, a -> set (1..a));
     -- Compute the cartesian product of the value lists
