@@ -109,3 +109,30 @@ toricModel Graph := opts -> G -> (
 
 
 -- So far, this is literally the same as NormalToricVariety
+
+--------------------------------------------------------------------
+----- Basic features of the DiscreteRandomVariable datatype
+--------------------------------------------------------------------
+DiscreteRandomVariable = new Type of HashTable
+DiscreteRandomVariable.synonym = "discrete random variable"
+expression DiscreteRandomVariable := X -> if hasAttribute (X, ReverseDictionary) 
+    then expression getAttribute (X, ReverseDictionary) else 
+    (describe X)#0
+texMath DiscreteRandomVariable := X -> texMath expression X
+describe DiscreteRandomVariable := X -> Describe (expression hashTable) (expression arity X)
+
+net DiscreteRandomVariable := net @@ expression
+
+discreteRandomVariable = method (
+    TypicalValue => DiscreteRandomVariable, 
+    Options => {
+    	Variable => getSymbol "X"
+    }
+    )
+
+discreteRandomVariable ZZ := opts -> d -> (
+    new DiscreteRandomVariable from {
+        symbol arity => d,
+        symbol cache => new CacheTable
+    }
+)
