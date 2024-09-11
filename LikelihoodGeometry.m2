@@ -22,6 +22,7 @@ newPackage("LikelihoodGeometry",
 export{
     -- Types
     "ToricModel",
+    "DiscreteRandomVariable",
     -- Functions/Methods
     "LCRing",
     "computeIndependenceLC",
