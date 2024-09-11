@@ -74,5 +74,17 @@ check LikelihoodGeometry
 
 debug needsPackage "LikelihoodGeometry";
 
-A = matrix{{1,1,0,0},{0,0,1,1}, {1,0,1,0}, {0,1,0,1}}
-toricModel A
+--- Will need a better way to make a bunch of DiscreteRandomVariables.
+a = discreteRandomVariable 2;
+b = discreteRandomVariable 2;
+c = discreteRandomVariable 2;
+d = discreteRandomVariable 2;
+-- these dont create distinct instances.... why???
+
+G = graph{{a,b},{b,c},{c,d}}
+findMaximalCliques G
+
+
+generatingSubsets = {{0,1},{1,2}};
+discreteRandomVariables = {2,2,2}; 
+makeLogLinearMatrix({{0,1},{1,2}},{2,2,2})
