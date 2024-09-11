@@ -3,6 +3,23 @@
 hasAttribute = value Core#"private dictionary"#"hasAttribute";
 getAttribute = value Core#"private dictionary"#"getAttribute";
 ReverseDictionary = value Core#"private dictionary"#"ReverseDictionary";
+
+--------------------------------------------------------------------
+----- Internal helper functions
+--------------------------------------------------------------------
+
+-- Function to generate all states of a list of discrete random variables given a list of arities
+generateStates = (arities) -> (
+    cartesianProd = (A, B) -> (A**B);
+    -- Generate the list of sets of all values each variable can take
+    valueSets = apply(arities, a -> set (1..a));
+    -- Compute the cartesian product of the value lists
+    combinations = fold(cartesianProd,valueSets) / deepSplice / toList;
+    rsort(toList(combinations))
+);
+
+
+
 --------------------------------------------------------------------
 ----- Basic features of the ToricModels datatype
 --------------------------------------------------------------------
