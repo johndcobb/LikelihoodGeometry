@@ -35,6 +35,48 @@ makeLogLinearMatrix(List, List) := Matrix => (generatingSubsets, discreteRandomV
     matrix matrixList
 )
 
+-- Define a function to check if a set of vertices forms a clique
+isClique = (G, vertices) -> (
+    -- Check if all pairs of vertices are connected
+    all(subsets(vertices, 2) / (pair -> any(edges G, edge -> edge == set pair)))
+)
+
+
+-- Define a method to find maximal cliques in a graph
+findMaximalCliques = method()
+
+-- Implementation of the method for Graph objects, returning a list of cliques
+findMaximalCliques(Graph) := List => (G) -> (
+    -- If the graph has no vertices, return an empty list
+    if #(vertices G) == 0 then return {};
+
+    -- Generate all possible cliques of size equal to the clique number of the graph
+    possibleCliques = subsets(vertices G, cliqueNumber G);
+
+    -- Initialize an empty list to store the cliques
+    Cliques = {};
+
+    -- Iterate over all possible cliques
+    for possibleClique in possibleCliques do (
+        -- Check if the current subset of vertices forms a clique
+        if isClique(G, possibleClique) then (
+            -- If it is a clique, add it to the list of cliques
+            Cliques = Cliques | {possibleClique};
+        );
+    );
+
+    -- Find vertices that are not part of any clique found so far
+    remainingUnmatchedVertices = vertices G - union(Cliques / set);
+
+    -- If there are unmatched vertices, recursively find cliques in the induced subgraph
+    if #remainingUnmatchedVertices != 0 then (
+        Cliques = Cliques | findMaximalCliques(inducedSubgraph(G, remainingUnmatchedVertices));
+    );
+
+    -- Return the list of cliques
+    Cliques
+)
+
 
 --------------------------------------------------------------------
 ----- Basic features of the ToricModels datatype
