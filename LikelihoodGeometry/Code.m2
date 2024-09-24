@@ -23,15 +23,28 @@ makeLogLinearMatrix(List, List) := Matrix => (generatingSubsets, discreteRandomV
     -- expecting the GeneratingSubsets to be a list containing sets of integers which index discreteRandomVariables
     -- expecting discreteRandomVariables to be a list of numbers which describe the arity of the random variables -- e.g. (2,2,2,2) for 4 binary random variables
 
+    -- Generate all possible states for the given discrete random variables
     allStates = generateStates(discreteRandomVariables);
+
+    -- Initialize an empty list to store the rows of the log-linear matrix
     matrixList = {};
+
+    -- Iterate over each generating subset
     for g in generatingSubsets do (
+        -- Generate all possible states for the current subset of discrete random variables
         gStates = generateStates(discreteRandomVariables_g);
+        
+        -- Iterate over each state of the current subset
         for gState in gStates do (
+            -- Create a row for the log-linear matrix where each entry is 1 if the state matches the current subset state, otherwise 0
             gRow = apply(apply(allStates, state -> state_g == gState), b -> if b then 1 else 0);
+            
+            -- Add the generated row to the matrix list
             matrixList = matrixList | {gRow};
         );
     );
+
+    -- Convert the list of rows into a matrix
     matrix matrixList
 )
 
@@ -113,7 +126,7 @@ toricModel Graph := opts -> G -> (
 --------------------------------------------------------------------
 ----- Basic features of the DiscreteRandomVariable datatype
 --------------------------------------------------------------------
-DiscreteRandomVariable = new Type of HashTable
+DiscreteRandomVariable = new Type of MutableHashTable
 DiscreteRandomVariable.synonym = "discrete random variable"
 expression DiscreteRandomVariable := X -> if hasAttribute (X, ReverseDictionary) 
     then expression getAttribute (X, ReverseDictionary) else 
