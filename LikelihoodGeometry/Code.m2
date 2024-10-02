@@ -128,11 +128,23 @@ toricModel Graph := opts -> G -> (
 --------------------------------------------------------------------
 DiscreteRandomVariable = new Type of MutableHashTable
 DiscreteRandomVariable.synonym = "discrete random variable"
-expression DiscreteRandomVariable := X -> if hasAttribute (X, ReverseDictionary) 
+DiscreteRandomVariable.GlobalAssignHook = globalAssignFunction
+DiscreteRandomVariable.GlobalReleaseHook = globalReleaseFunction
+
+arity = method()
+arity NormalToricVariety := ZZ => X -> X.arity
+
+expression DiscreteRandomVariable := X -> (
+    if hasAttribute (X, ReverseDictionary) 
     then expression getAttribute (X, ReverseDictionary) else 
-    (describe X)#0
+    (describe X)
+)
 texMath DiscreteRandomVariable := X -> texMath expression X
-describe DiscreteRandomVariable := X -> Describe (expression hashTable) (expression arity X)
+describe DiscreteRandomVariable := X -> (
+    myOutput := {net "arity => " | net X.arity};
+    horizontalJoin flatten ("{", stack myOutput, "}")
+)
+toString DiscreteRandomVariable := X -> toString expression X
 
 net DiscreteRandomVariable := net @@ expression
 
@@ -141,7 +153,7 @@ discreteRandomVariable = method (
     Options => {
     	Variable => getSymbol "X"
     }
-    )
+)
 
 discreteRandomVariable ZZ := opts -> d -> (
     new DiscreteRandomVariable from {
