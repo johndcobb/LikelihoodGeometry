@@ -176,9 +176,31 @@ discreteRandomVariable = method (
 )
 
 discreteRandomVariable ZZ := opts -> d -> (
+    if d < 1 then error "--expected a positive integer";
     new DiscreteRandomVariable from {
         symbol arity => d,
         symbol cache => new CacheTable,
         symbol pmf => "Uniform"
     }
+)
+
+isWellDefined DiscreteRandomVariable := Boolean => X -> (
+    K := keys X;
+    expectedKeys := set {symbol arity, symbol cache, symbol pmf};
+    if set K =!= expectedKeys then (
+	if debugLevel > 0 then (
+	    added := toList (K - expectedKeys);
+	    missing := toList (expectedKeys - K);
+	    if #added > 0 then 
+	    << "-- unexpected key(s): " << toString added << endl;
+	    if #missing > 0 then 
+	    << "-- missing keys(s): " << toString missing << endl
+	    );	 
+    	return false
+    	);
+    if not instance (X.cache, CacheTable) then (
+    	if debugLevel > 0 then 
+	    << "-- expected `X.cache' to be a CacheTable" << endl;
+    	return false
+	);
 )
