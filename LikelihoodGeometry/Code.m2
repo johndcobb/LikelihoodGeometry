@@ -10,21 +10,14 @@ ReverseDictionary = value Core#"private dictionary"#"ReverseDictionary";
 
 -- Function to generate all states of a list of discrete random variables given a list of arities
 cartesianProd = (A, B) -> (A**B);
-generateStates = (arities) -> (
-    -- Generate the list of sets of all values each variable can take
-    valueSets = apply(arities, a -> set (1..a));
-    -- Compute the cartesian product of the value lists
-    combinations = fold(cartesianProd,valueSets) / deepSplice / toList;
-    rsort(toList(combinations))
-);
 
 makeLogLinearMatrix = method()
 makeLogLinearMatrix(List, List) := Matrix => (generatingSubsets, discreteRandomVariables) -> (
-    -- expecting the GeneratingSubsets to be a list containing sets of integers which index discreteRandomVariables
-    -- expecting discreteRandomVariables to be a list of numbers which describe the arity of the random variables -- e.g. (2,2,2,2) for 4 binary random variables
+    -- expecting the GeneratingSubsets to be a list containing sublists of discreteRandomVariables
+    -- expecting discreteRandomVariables to be a list of DiscreteRandomVariables which describe the arity of the random variables -- e.g. (2,2,2,2) for 4 binary random variables
 
     -- Generate all possible states for the given discrete random variables
-    allStates = generateStates(discreteRandomVariables);
+    allStates = states discreteRandomVariables;
 
     -- Initialize an empty list to store the rows of the log-linear matrix
     matrixList = {};
@@ -32,12 +25,13 @@ makeLogLinearMatrix(List, List) := Matrix => (generatingSubsets, discreteRandomV
     -- Iterate over each generating subset
     for g in generatingSubsets do (
         -- Generate all possible states for the current subset of discrete random variables
-        gStates = generateStates(discreteRandomVariables_g);
+        gStates = states g;
+        gPositions = apply(g, x -> position(discreteRandomVariables, l -> l === x)); -- this exchanges g for their positions within the original list of random variables
         
         -- Iterate over each state of the current subset
         for gState in gStates do (
             -- Create a row for the log-linear matrix where each entry is 1 if the state matches the current subset state, otherwise 0
-            gRow = apply(apply(allStates, state -> state_g == gState), b -> if b then 1 else 0);
+            gRow = apply(apply(allStates, state -> state_gPositions == gState), b -> if b then 1 else 0);
             
             -- Add the generated row to the matrix list
             matrixList = matrixList | {gRow};
@@ -47,6 +41,8 @@ makeLogLinearMatrix(List, List) := Matrix => (generatingSubsets, discreteRandomV
     -- Convert the list of rows into a matrix
     matrix matrixList
 )
+
+makeLogLinearMatrix Graph := Matrix => G -> (makeLogLinearMatrix(findMaximalCliques G, vertices G))
 
 -- Define a function to check if a set of vertices forms a clique
 isClique = (G, vertices) -> (
@@ -106,7 +102,7 @@ describe ToricModel := X -> Describe (expression toricVariety) (
     expression rays X, expression max X)
 
 toricModel = method (
-    TypicalValue => ToricModel, 
+    TypicalValue => ToricModel,
     Options => {
     	CoefficientRing   => KK,
     	MinimalGenerators => false,
@@ -117,7 +113,9 @@ toricModel Matrix := opts -> vertices -> (
     new ToricModel from normalToricVariety vertices
 )
 toricModel Graph := opts -> G -> (
-    new ToricModel from normalToricVariety makeLogLinearMatrix(G)
+    X := new ToricModel from normalToricVariety makeLogLinearMatrix(G);
+    X.cache.Graph = G;
+    X
 )
 
 
@@ -132,7 +130,15 @@ DiscreteRandomVariable.GlobalAssignHook = globalAssignFunction
 DiscreteRandomVariable.GlobalReleaseHook = globalReleaseFunction
 
 arity = method()
-arity NormalToricVariety := ZZ => X -> X.arity
+arity DiscreteRandomVariable := ZZ => X -> X.arity
+states = method()
+states DiscreteRandomVariable := List => X -> toList(1..X.arity)
+states List := List => L -> (
+    if all(L, x -> class x === DiscreteRandomVariable) != true then error "--expected a list of DiscreteRandomVariables";
+    valueSets := apply(L, x -> set states x);
+    combinations := fold(cartesianProd,valueSets) / deepSplice / toList;
+    rsort(toList(combinations))
+)
 
 expression DiscreteRandomVariable := X -> (
     if hasAttribute (X, ReverseDictionary) 
