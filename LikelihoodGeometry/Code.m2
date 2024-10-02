@@ -182,6 +182,9 @@ isWellDefined DiscreteRandomVariable := Boolean => X -> (
     	return false
 	);
 true)
+-- make sure pmf is probability density function
+-- swap out "Uniform" text with just uniform distribution
+-- make functions that display mean and variance and whatnot.
 
 states = method()
 states DiscreteRandomVariable := List => X -> toList(1..X.arity)
@@ -213,4 +216,27 @@ sample List := List => L -> (
 sample(List, ZZ) := (L, n) -> (
     if all(L, x -> class x === DiscreteRandomVariable) != true then error "--expected a list of DiscreteRandomVariables";
     for i in 1..n list sample L
+)
+
+mean = method()
+mean DiscreteRandomVariable := RR => X -> (
+    pmfs := apply(states X, i -> X.pmf(i));
+    sum(pack(2,mingle(pmfs, states X)) / product)
+)
+
+mean List := List => L -> (
+    if all(L, x -> class x === DiscreteRandomVariable) != true then error "--expected a list of DiscreteRandomVariables";
+    apply(L, x -> mean x)
+)
+
+variance = method()
+variance DiscreteRandomVariable := RR => X -> (
+    pmfs := apply(states X, i -> X.pmf(i));
+    X2 := apply(states X, i -> i^2);
+    sum(pack(2,mingle(pmfs, X2)) / product) - (mean X)^2
+)
+
+variance List := List => L -> (
+    if all(L, x -> class x === DiscreteRandomVariable) != true then error "--expected a list of DiscreteRandomVariables";
+    apply(L, x -> variance x)
 )
