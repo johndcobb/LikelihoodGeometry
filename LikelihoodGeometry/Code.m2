@@ -139,6 +139,20 @@ states List := List => L -> (
     combinations := fold(cartesianProd,valueSets) / deepSplice / toList;
     rsort(toList(combinations))
 )
+sample = method()
+sample DiscreteRandomVariable := ZZ => X -> (
+    if X.pmf == "Uniform" then (
+        return random(1..X.arity)
+    );
+)
+sample List := List => L -> (
+    if all(L, x -> class x === DiscreteRandomVariable) != true then error "--expected a list of DiscreteRandomVariables";
+    apply(L, x -> sample x)
+)
+sample(List, ZZ) := (L, n) -> (
+    if all(L, x -> class x === DiscreteRandomVariable) != true then error "--expected a list of DiscreteRandomVariables";
+    for i in 1..n list sample L
+)
 
 expression DiscreteRandomVariable := X -> (
     if hasAttribute (X, ReverseDictionary) 
@@ -164,6 +178,7 @@ discreteRandomVariable = method (
 discreteRandomVariable ZZ := opts -> d -> (
     new DiscreteRandomVariable from {
         symbol arity => d,
-        symbol cache => new CacheTable
+        symbol cache => new CacheTable,
+        symbol pmf => "Uniform"
     }
 )
