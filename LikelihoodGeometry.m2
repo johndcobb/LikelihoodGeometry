@@ -46,6 +46,7 @@ export{
 load "LikelihoodGeometry/legacycode.m2"
 load "LikelihoodGeometry/Code.m2"
 
+load "LikelihoodGeometry/CodeMatt.m2"
 
 --- THINGS TO IMPLEMENT? -- 
 -*
