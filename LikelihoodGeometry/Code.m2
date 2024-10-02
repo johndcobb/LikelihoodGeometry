@@ -131,28 +131,6 @@ DiscreteRandomVariable.GlobalReleaseHook = globalReleaseFunction
 
 arity = method()
 arity DiscreteRandomVariable := ZZ => X -> X.arity
-states = method()
-states DiscreteRandomVariable := List => X -> toList(1..X.arity)
-states List := List => L -> (
-    if all(L, x -> class x === DiscreteRandomVariable) != true then error "--expected a list of DiscreteRandomVariables";
-    valueSets := apply(L, x -> set states x);
-    combinations := fold(cartesianProd,valueSets) / deepSplice / toList;
-    rsort(toList(combinations))
-)
-sample = method()
-sample DiscreteRandomVariable := ZZ => X -> (
-    if X.pmf == "Uniform" then (
-        return random(1..X.arity)
-    );
-)
-sample List := List => L -> (
-    if all(L, x -> class x === DiscreteRandomVariable) != true then error "--expected a list of DiscreteRandomVariables";
-    apply(L, x -> sample x)
-)
-sample(List, ZZ) := (L, n) -> (
-    if all(L, x -> class x === DiscreteRandomVariable) != true then error "--expected a list of DiscreteRandomVariables";
-    for i in 1..n list sample L
-)
 
 expression DiscreteRandomVariable := X -> (
     if hasAttribute (X, ReverseDictionary) 
@@ -203,4 +181,36 @@ isWellDefined DiscreteRandomVariable := Boolean => X -> (
 	    << "-- expected `X.cache' to be a CacheTable" << endl;
     	return false
 	);
+true)
+
+states = method()
+states DiscreteRandomVariable := List => X -> toList(1..X.arity)
+states List := List => L -> (
+    if all(L, x -> class x === DiscreteRandomVariable) != true then error "--expected a list of DiscreteRandomVariables";
+    valueSets := apply(L, x -> set states x);
+    combinations := fold(cartesianProd,valueSets) / deepSplice / toList;
+    rsort(toList(combinations))
+)
+
+sample = method()
+sample DiscreteRandomVariable := ZZ => X -> (
+    if X.pmf === "Uniform" then (
+        return random(1,X.arity)
+    )
+    else (
+        cdf := accumulate(plus, 0, apply(states X, i -> X.pmf(i)));
+        randomRR := random(0.0,1.0);
+        return position(cdf, x -> x > randomRR)
+    );
+)
+sample(DiscreteRandomVariable, ZZ) := ZZ => (X, n) -> (
+    for i in 1..n list sample X
+)
+sample List := List => L -> (
+    if all(L, x -> class x === DiscreteRandomVariable) != true then error "--expected a list of DiscreteRandomVariables";
+    apply(L, x -> sample x)
+)
+sample(List, ZZ) := (L, n) -> (
+    if all(L, x -> class x === DiscreteRandomVariable) != true then error "--expected a list of DiscreteRandomVariables";
+    for i in 1..n list sample L
 )
