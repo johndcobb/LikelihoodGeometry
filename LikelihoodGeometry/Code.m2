@@ -155,10 +155,11 @@ discreteRandomVariable = method (
 
 discreteRandomVariable ZZ := opts -> d -> (
     if d < 1 then error "--expected a positive integer";
+    g := x -> if x > 0 and x <= d then 1/d else 0;
     new DiscreteRandomVariable from {
         symbol arity => d,
         symbol cache => new CacheTable,
-        symbol pmf => "Uniform"
+        symbol pmf => g
     }
 )
 
@@ -181,10 +182,13 @@ isWellDefined DiscreteRandomVariable := Boolean => X -> (
 	    << "-- expected `X.cache' to be a CacheTable" << endl;
     	return false
 	);
+    pmfs := apply(states X, i -> X.pmf(i));
+    if not sum(pmfs) == 1 then (
+    	if debugLevel > 0 then 
+        << "-- expected the sum of the pmf to be 1" << endl;
+    	return false
+    );
 true)
--- make sure pmf is probability density function
--- swap out "Uniform" text with just uniform distribution
--- make functions that display mean and variance and whatnot.
 
 states = method()
 states DiscreteRandomVariable := List => X -> toList(1..X.arity)
@@ -197,14 +201,9 @@ states List := List => L -> (
 
 sample = method()
 sample DiscreteRandomVariable := ZZ => X -> (
-    if X.pmf === "Uniform" then (
-        return random(1,X.arity)
-    )
-    else (
         cdf := accumulate(plus, 0, apply(states X, i -> X.pmf(i)));
         randomRR := random(0.0,1.0);
         return position(cdf, x -> x > randomRR)
-    );
 )
 sample(DiscreteRandomVariable, ZZ) := ZZ => (X, n) -> (
     for i in 1..n list sample X
