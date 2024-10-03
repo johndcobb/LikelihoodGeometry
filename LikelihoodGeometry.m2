@@ -6,6 +6,7 @@
 -- UPDATE HISTORY : created 7 September 2023 as a part of the IMSI workshop --  --                  "Algebraic Statistics";
 ---------------------------------------------------------------------------
 newPackage("LikelihoodGeometry",
+    AuxiliaryFiles => true,
     Version => "0.1",
     Date => "4 September 2024",
     Authors => {
@@ -39,15 +40,15 @@ export{
     "Symbols"
     -- Helper functions
 }
+protect pmf
 
+baseDirectory = LikelihoodGeometry#"source directory"
 --------------------------------------------------------------------
 ----- CODE
 --------------------------------------------------------------------
-load "LikelihoodGeometry/legacycode.m2"
-load "LikelihoodGeometry/Code.m2"
-
-load "LikelihoodGeometry/CodeMatt.m2"
-
+load(baseDirectory | "LikelihoodGeometry/legacycode.m2")
+load(baseDirectory | "LikelihoodGeometry/Code.m2")
+load(baseDirectory | "LikelihoodGeometry/CodeMatt.m2")
 --- THINGS TO IMPLEMENT? -- 
 -*
 
@@ -57,12 +58,12 @@ load "LikelihoodGeometry/CodeMatt.m2"
 ----- DOCUMENTATION
 --------------------------------------------------------------------
 beginDocumentation()
-load "LikelihoodGeometry/Documentation.m2"
+load(baseDirectory | "LikelihoodGeometry/Documentation.m2")
 
 --------------------------------------------------------------------
 ----- TESTS
 --------------------------------------------------------------------
-load "LikelihoodGeometry/Tests.m2"
+load(baseDirectory | "LikelihoodGeometry/Tests.m2")
 end
 
 --------------------------------------------------------------------
