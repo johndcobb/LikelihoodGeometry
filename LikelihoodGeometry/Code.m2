@@ -1,4 +1,4 @@
-
+KK = QQ; --global base ring
 --- kludge to access parts of the 'Core'
 hasAttribute = value Core#"private dictionary"#"hasAttribute";
 getAttribute = value Core#"private dictionary"#"getAttribute";
@@ -17,24 +17,24 @@ makeLogLinearMatrix(List, List) := Matrix => (generatingSubsets, discreteRandomV
     -- expecting discreteRandomVariables to be a list of DiscreteRandomVariables which describe the arity of the random variables -- e.g. (2,2,2,2) for 4 binary random variables
 
     -- Generate all possible states for the given discrete random variables
-    allStates = states discreteRandomVariables;
+    allStates := states discreteRandomVariables;
 
     -- Initialize an empty list to store the rows of the log-linear matrix
-    matrixList = {};
+    matrixList := {};
 
     -- Iterate over each generating subset
     for g in generatingSubsets do (
         -- Generate all possible states for the current subset of discrete random variables
-        gStates = states g;
-        gPositions = apply(g, x -> position(discreteRandomVariables, l -> l === x)); -- this exchanges g for their positions within the original list of random variables
+        gStates := states g;
+        gPositions := apply(g, x -> position(discreteRandomVariables, l -> l === x)); -- this exchanges g for their positions within the original list of random variables
         
         -- Iterate over each state of the current subset
         for gState in gStates do (
             -- Create a row for the log-linear matrix where each entry is 1 if the state matches the current subset state, otherwise 0
-            gRow = apply(apply(allStates, state -> state_gPositions == gState), b -> if b then 1 else 0);
+            gRow := apply(apply(allStates, state -> state_gPositions == gState), b -> if b then 1 else 0);
             
             -- Add the generated row to the matrix list
-            matrixList = matrixList | {gRow};
+            matrixList := matrixList | {gRow};
         );
     );
 
@@ -60,10 +60,10 @@ findMaximalCliques(Graph) := List => (G) -> (
     if #(vertices G) == 0 then return {};
 
     -- Generate all possible cliques of size equal to the clique number of the graph
-    possibleCliques = subsets(vertices G, cliqueNumber G);
+    possibleCliques := subsets(vertices G, cliqueNumber G);
 
     -- Initialize an empty list to store the cliques
-    Cliques = {};
+    Cliques := {};
 
     -- Iterate over all possible cliques
     for possibleClique in possibleCliques do (
@@ -75,7 +75,7 @@ findMaximalCliques(Graph) := List => (G) -> (
     );
 
     -- Find vertices that are not part of any clique found so far
-    remainingUnmatchedVertices = vertices G - union(Cliques / set);
+    remainingUnmatchedVertices := vertices G - union(Cliques / set);
 
     -- If there are unmatched vertices, recursively find cliques in the induced subgraph
     if #remainingUnmatchedVertices != 0 then (
@@ -98,8 +98,7 @@ expression ToricModel := X -> if hasAttribute (X, ReverseDictionary)
     then expression getAttribute (X, ReverseDictionary) else 
     (describe X)#0
 texMath ToricModel := X -> texMath expression X
-describe ToricModel := X -> Describe (expression toricVariety) (
-    expression rays X, expression max X)
+describe ToricModel := X -> Describe (expression toricModel) (expression rays X, expression max X)
 
 toricModel = method (
     TypicalValue => ToricModel,
