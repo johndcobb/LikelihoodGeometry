@@ -1,5 +1,3 @@
-
-
 computeLCTM = method();
 computeLCTM(ToricModel) := (X) -> (
     if not member("LC", keys X.cache) then (
@@ -16,7 +14,9 @@ computeLCTM(ToricModel) := (X) -> (
         toric := toricIdeal(A, R);
         M := reshape(R^numcol, R^2, matrix({gens R}));
         I := toric + minors(2, A * M);
-        L := saturate(I, sum entries M_0); 
+        pprod := product entries M_0;
+        psum := sum entries M_0;
+        L := saturate(I, pprod*psum); 
 
         -- Cache the computed "LC" value
         X.cache#"LC" = L;
@@ -25,3 +25,7 @@ computeLCTM(ToricModel) := (X) -> (
     -- Return the cached "LC" value
     X.cache#"LC"
 );
+
+computeLC = method(ToricModel => (X) -> (
+    computeLCTM(X)
+));
