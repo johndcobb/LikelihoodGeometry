@@ -109,14 +109,17 @@ toricModel = method (
 	}
     )
 toricModel Matrix := opts -> vertices -> (
-    new ToricModel from normalToricVariety vertices
-)
-toricModel Graph := opts -> G -> (
-    X := new ToricModel from normalToricVariety makeLogLinearMatrix(G);
-    X.cache.Graph = G;
+    X := new ToricModel from normalToricVariety vertices;
+    X.cache#"mat" = vertices;
     X
 )
-
+toricModel Graph := opts -> G -> (
+    A := makeLogLinearMatrix G;
+    X := new ToricModel from normalToricVariety A;
+    X.cache#"mat" = vertices;   
+    X.cache#"Graph" = G;
+    X
+)
 
 -- So far, this is literally the same as NormalToricVariety
 
