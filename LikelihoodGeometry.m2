@@ -35,6 +35,7 @@ export{
     "computenwayToricMatrix",
     "computeToricLCwithToric",
     "computeToricLCwithToricSeq",
+    "rationalNormalScroll",
     -- Symbols
     "Start",
     "Symbols"
@@ -49,6 +50,7 @@ baseDirectory = LikelihoodGeometry#"source directory"
 load(baseDirectory | "LikelihoodGeometry/legacycode.m2")
 load(baseDirectory | "LikelihoodGeometry/Code.m2")
 load(baseDirectory | "LikelihoodGeometry/CodeMatt.m2")
+load(baseDirectory | "LikelihoodGeometry/Constructions.m2")
 --- THINGS TO IMPLEMENT? -- 
 -*
 
