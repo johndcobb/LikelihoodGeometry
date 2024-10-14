@@ -26,6 +26,7 @@ makeLogLinearMatrix(List, List) := Matrix => (generatingSubsets, discreteRandomV
     for g in generatingSubsets do (
         -- Generate all possible states for the current subset of discrete random variables
         gStates := states g;
+        if #g == 1 then gStates = pack(gStates,1); -- make it work for singletons
         gPositions := apply(g, x -> position(discreteRandomVariables, l -> l === x)); -- this exchanges g for their positions within the original list of random variables
         
         -- Iterate over each state of the current subset
@@ -34,7 +35,7 @@ makeLogLinearMatrix(List, List) := Matrix => (generatingSubsets, discreteRandomV
             gRow := apply(apply(allStates, state -> state_gPositions == gState), b -> if b then 1 else 0);
             
             -- Add the generated row to the matrix list
-            matrixList := matrixList | {gRow};
+            matrixList = matrixList | {gRow};
         );
     );
 
@@ -116,7 +117,7 @@ toricModel Matrix := opts -> vertices -> (
 toricModel Graph := opts -> G -> (
     A := makeLogLinearMatrix G;
     X := new ToricModel from normalToricVariety A;
-    X.cache#"mat" = vertices;   
+    X.cache#"mat" = A;   
     X.cache#"Graph" = G;
     X
 )
@@ -196,6 +197,7 @@ states = method()
 states DiscreteRandomVariable := List => X -> toList(1..X.arity)
 states List := List => L -> (
     if all(L, x -> class x === DiscreteRandomVariable) != true then error "--expected a list of DiscreteRandomVariables";
+    if #L == 1 then return states L_0;
     valueSets := apply(L, x -> set states x);
     combinations := fold(cartesianProd,valueSets) / deepSplice / toList;
     rsort(toList(combinations))
