@@ -87,6 +87,20 @@ findMaximalCliques(Graph) := List => (G) -> (
     Cliques
 )
 
+isJointlyIndependent = method()
+isJointlyIndependent(Graph) := Boolean => G -> (
+    C := connectedComponents G;
+    all(C, c -> isCompleteGraph(inducedSubgraph(G, c)))
+)
+
+isCompleteGraph = method()
+isCompleteGraph(Graph) := Boolean => G -> (
+    -- Check if the graph has no vertices
+    if #(vertices G) == 0 then return false;
+
+    -- Check if the graph has the maximum number of edges for its number of vertices
+    #edges G == #vertices G * (#vertices G - 1) / 2
+)
 
 --------------------------------------------------------------------
 ----- Basic features of the ToricModels datatype
@@ -243,3 +257,94 @@ variance List := List => L -> (
     if all(L, x -> class x === DiscreteRandomVariable) != true then error "--expected a list of DiscreteRandomVariables";
     apply(L, x -> variance x)
 )
+
+--------------------------------------------------------------------
+----- Methods utilizing ToricModels and DiscreteRandomVariables
+--------------------------------------------------------------------
+
+computeLC = method()
+computeLC(Ideal) := Ideal => I -> ( -- this works for arbitrary ideals
+    U := local U;
+    d := local d;
+    u := local u;
+    pmat := local pmat;
+    umat := local umat;
+    R := ring(I);
+    n := numgens R;
+    S := coefficientRing(R)[gens R, u_1..u_n];
+    varList := for i from 0 to #(gens R) -1 list S_i;
+    varList2 := for i from 0 to #(gens R) -1 list 1_S;
+    f := map(S,R,varList);
+    J := (matrix {varList2}) || transpose(f jacobian(I));
+    Q := minors(codim(I)+1,jacobian(I));
+
+    U = reshape(S^n,S^2,matrix{gens S});
+    pmat = transpose(matrix{U_0});
+    umat = transpose(matrix{U_1});
+    Jaug := umat || J*diagonalMatrix(varList);
+
+    H := ideal((sum flatten entries pmat)*(product flatten entries pmat));
+
+    L := saturate(f(I) + minors(codim(I)+2,Jaug),H+(f(Q)));
+    L)
+computeLC(ToricModel) := Ideal => X -> (
+    if member("LC", keys X.cache) then return X.cache#"LC"; -- check if its already been computed
+    if member("Graph", keys X.cache) and isJointlyIndependent(X.cache#"Graph") then return computeLCJI(X); 
+    p := local p;
+    u := local u;
+    numcol := local numcol;
+    M := local M;
+    -- Retrieve matrix A from the cache
+    A := X.cache#"mat";
+    if A === null then error "Matrix A is not defined in the cache of x";
+
+    numcol := numColumns(A);
+    R := QQ[p_1..p_numcol, u_1..u_numcol, Degrees => {numcol:{1,0}, numcol:{0,1}}];
+    toric := toricIdeal(A, R);
+    M := reshape(R^numcol, R^2, matrix({gens R}));
+    I := toric + minors(2, A * M);
+    pprod := product entries M_0;
+    psum := sum entries M_0;
+    L := saturate(I, psum); -- haven't saturated by coordinate hyperplanes
+
+    -- Cache the computed "LC" value
+    X.cache#"LC" = L;
+
+    -- Return the cached "LC" value
+    L
+)
+
+computeLCJI = method()
+computeLCJI(ToricModel) := Ideal => X -> (
+    G := X.cache#"Graph";
+    if isJointlyIndependent(G) != true then error "--expected the graph to be jointly independent";
+    p := local p;
+    u := local u;
+
+    allStates := states vertices G;
+
+    pvars := for state in allStates list p_(toSequence state);
+    uvars := for state in allStates list u_(toSequence state);
+    R := ZZ/32003[pvars, uvars, Degrees => toList(join(#pvars:{1,0}, #uvars:{0,1})) ];
+
+    matrixList := {};
+    for c in connectedComponents G do (
+        M := {};
+        cstates := states c;
+        if #c == 1 then cstates = pack(cstates,1); -- make it work for singletons
+        cPositions := apply(c, x -> position(vertices G, l -> l === x));
+        for cstate in cstates do (
+            cRow := select(allStates, state -> state_cPositions == cstate);
+            pList := for c in cRow list p_(toSequence c);
+            uSum := sum for c in cRow list u_(toSequence c);
+            M = M | {pList | {uSum}};
+        );
+        matrixList = matrixList | {M};
+    );
+
+    matrixList = matrixList / matrix;
+    I := sum for M in matrixList list minors(2, M);
+    X.cache#"LC" = I;
+    I
+)
+
