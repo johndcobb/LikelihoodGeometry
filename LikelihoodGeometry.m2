@@ -31,11 +31,11 @@ export{
     "states",
     "mean",
     "sample",
+    "MLdegree",
     -- Constructions
     "rationalNormalScroll",
-    "makeLogLinearMatrix",
+    "makeLogLinearMatrix"
     -- Symbols
-    "Symbols"
     -- Helper functions
 }
 protect pmf
@@ -45,8 +45,6 @@ baseDirectory = LikelihoodGeometry#"source directory"
 ----- CODE
 --------------------------------------------------------------------
 load(baseDirectory | "LikelihoodGeometry/Code.m2")
-load(baseDirectory | "LikelihoodGeometry/CodeMatt.m2")
-load(baseDirectory | "LikelihoodGeometry/Constructions.m2")
 --- THINGS TO IMPLEMENT? -- 
 -*
 
@@ -70,21 +68,46 @@ end
 uninstallPackage "LikelihoodGeometry";
 restart
 installPackage "LikelihoodGeometry"
-check LikelihoodGeometry
-
+--check LikelihoodGeometryf
 debug needsPackage "LikelihoodGeometry";
 
---- Will need a better way to make a bunch of DiscreteRandomVariables.
+a = discreteRandomVariable 2;
+b = discreteRandomVariable 3;
+c = discreteRandomVariable 4;
+
+G = graph({{a,b}, {b,c}})
+X = toricModel G
+Mlist = computeLCJI(X)
+I = computeLCJI(X) 
+J = computeLC(X)
+R = ring(I)
+S = ring(J)
+
 a = discreteRandomVariable 2;
 b = discreteRandomVariable 2;
 c = discreteRandomVariable 2;
-d = discreteRandomVariable 2;
--- these dont create distinct instances.... why???
+S = {{a,b}, {b,c}};
+L = {a,b,c};
+makeLogLinearMatrix(S,L)
 
-G = graph{{a,b},{b,c},{c,d}}
+LCRing(toricModel G)
+
+phi = map(R,S, vars R)
+phi(J) == I
+
+
+maxCliques = findMaximalCliques G
+states maxCliques
+makeLogLinearMatrix(maxCliques, vertices G)
+
+S = rationalNormalScroll({1,2,3})
+
+G = graph({1,2,3,4,5,6},{{2,3}, {4,5}, {5,6}, {6,4}})
+C = connectedComponents G
+isJointlyIndependent(G)
+
+
+G = graph{{a,b},{b,c}}
 findMaximalCliques G
-
-
-generatingSubsets = {{0,1},{1,2}};
-discreteRandomVariables = {2,2,2}; 
-makeLogLinearMatrix({{0,1},{1,2}},{2,2,2})
+X = toricModel G
+X.cache.Graph
