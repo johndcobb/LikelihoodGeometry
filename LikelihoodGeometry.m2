@@ -25,19 +25,17 @@ export{
     "ToricModel",
     "DiscreteRandomVariable",
     -- Functions/Methods
+    "discreteRandomVariable",
     "LCRing",
-    "computeIndependenceLC",
-    "computeToricLC",
     "computeLC",
-    "computenwayIndependenceLC",
-    "nwayindependenceMatrices",
-    "computenwayindependenceModel",
-    "computenwayToricMatrix",
-    "computeToricLCwithToric",
-    "computeToricLCwithToricSeq",
+    "toricModel",
+    "states",
+    "mean",
+    "sample",
+    -- Constructions
     "rationalNormalScroll",
+    "makeLogLinearMatrix",
     -- Symbols
-    "Start",
     "Symbols"
     -- Helper functions
 }
