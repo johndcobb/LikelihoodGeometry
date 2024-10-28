@@ -310,11 +310,42 @@ SeeAlso
   toricModel
 ///
 
+
 doc ///
 Key
-  ToricModel
+  DiscreteRandomVariable
 Headline
-  the class of all toric models
+  the class of all discrete random variables
+Description
+  Text
+    A discrete random variable $X$ is a random variable with a finite number of states. It carries $\texttt{arity}$ and $\texttt{pmf}$, which are the number of states and the probability mass function of $X$, respectively.
+SeeAlso
+  discreteRandomVariable
+  (states, DiscreteRandomVariable)
+  (sample, DiscreteRandomVariable)
+  (mean, DiscreteRandomVariable)
+///
+
+doc ///
+Key 
+  makeLogLinearMatrix
+  (makeLogLinearMatrix, Graph)
+  (makeLogLinearMatrix, List, List)
+Headline
+  Constructs the defining matrix of a hierarchical log-linear model as a toric variety
+Usage
+  makeLogLinearMatrix(G)
+  makeLogLinearMatrix(S, L)
+Inputs
+  G: Graph
+    a graph representing a undirected graphical model
+  S: List
+    a set of subsets of L, the generators of the model
+  L: List
+    a list of discrete random variables
+Outputs
+  A: Matrix
+    the defining matrix of the hierarchical log-linear model as a toric model
 Description
   Text
     Hierarchical log--linear models are a class of toric models. Let $\mc{X} = [d_1] \times \cdots \times [d_n]$ denote the joint state space of the discrete random variables $X_1,\dots, X_n$. A \textit{hierarchical log--linear model} (or simply \textit{log--linear model}) is defined by a collection $S = \{G_1,\dots, G_g\}$ of non-empty subsets of $L = \{X_1,\dots, X_n\}$ called \textit{generators}. This function takes these two inputs and constructs the defining matrix of the hierarchical log--linear model as a toric variety, where the columns are the lattice vertices of the polytope of the toric variety.
