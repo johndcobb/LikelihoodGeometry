@@ -335,11 +335,25 @@ SeeAlso
 
 doc ///
 Key
-  DiscreteRandomVariable
+  MLdegree
+  (MLdegree, NormalToricVariety)
 Headline
-  the class of all discrete random variables
+  Computes the maximum likelihood degree of a toric model
+Usage
+  MLdegree(X)
+Inputs
+  X: NormalToricVariety
+Outputs
+  d: ZZ
+    the maximum likelihood degree of the toric model
 Description
   Text
-    A discrete random variable is a random variable with a finite number of states. 
+    The function MLdegree computes the maximum likelihood degree of a toric model $\mathcal{M}\subseteq \mathbb{P}^n_p$. 
+  Example
+    a = discreteRandomVariable 2; b = discreteRandomVariable 3;
+    G = graph{{a,b}};
+    X = toricModel G;
+    MLdegree(X)
 SeeAlso
+  toricModel
 ///

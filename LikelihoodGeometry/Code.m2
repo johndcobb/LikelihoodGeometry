@@ -353,3 +353,26 @@ LCRing(NormalToricVariety) := X -> ( --I should change the methods that use Norm
     X.cache.CoefficientRing[p_1..p_numcol, u_1..u_numcol, Degrees => {numcol:{1,0}, numcol:{0,1}}]
 ) 
 
+MLdegree = method();
+MLdegree(NormalToricVariety) := (X) -> (
+    if member("MLD", keys X.cache) then return X.cache#"MLD"; -- check if its already been computed
+    if not member("LC", keys X.cache) then (
+        computeLC(X);
+    );
+    curLC := X.cache#"LC";
+    
+    -- Return the cached "LC" value
+    curVars := vars ring curLC;
+    numVars := numColumns(curVars);
+    numVars2 := numVars//2;
+    use ring curLC;
+    randu := for i from 0 to (numVars2-1) list random(numVars2*20);
+    useVars := for i from 0 to (numVars2-1) list curVars_i_0;
+    curR := QQ[useVars];
+    useVars3 := for i from 0 to (numVars2-1) list (vars curR)_i_0;
+    specmap := map(curR, ring curLC, join(useVars3, randu));
+    X.cache#"MLD" = degree (specmap curLC);
+
+    X.cache#"MLD"
+);
+
