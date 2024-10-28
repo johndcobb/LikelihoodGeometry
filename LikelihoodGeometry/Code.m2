@@ -136,7 +136,13 @@ toricModel Graph := opts -> G -> (
     X
 )
 
--- So far, this is literally the same as NormalToricVariety
+-*toricModel Graph := NormalToricVariety => opts -> G -> (
+    A := makeLogLinearMatrix G;
+    X := normalToricVariety A;
+    X.cache#"mat" = A;
+    X.cache#"Graph" = G;
+    X
+)*-
 
 --------------------------------------------------------------------
 ----- Basic features of the DiscreteRandomVariable datatype
@@ -263,13 +269,12 @@ variance List := List => L -> (
 --------------------------------------------------------------------
 
 computeLC = method()
-computeLC(Ideal) := Ideal => I -> ( -- this works for arbitrary ideals
+computeLC(Ideal, Ring) := Ideal => (I,R) -> ( -- this works for arbitrary ideals
     U := local U;
     d := local d;
     u := local u;
     pmat := local pmat;
     umat := local umat;
-    R := ring(I);
     n := numgens R;
     S := coefficientRing(R)[gens R, u_1..u_n];
     varList := for i from 0 to #(gens R) -1 list S_i;
@@ -287,6 +292,7 @@ computeLC(Ideal) := Ideal => I -> ( -- this works for arbitrary ideals
 
     L := saturate(f(I) + minors(codim(I)+2,Jaug),H+(f(Q)));
     L)
+computeLC(Ideal) := I -> computeLC(I, ring I)
 computeLC(ToricModel) := Ideal => X -> (
     if member("LC", keys X.cache) then return X.cache#"LC"; -- check if its already been computed
     if member("Graph", keys X.cache) and isJointlyIndependent(X.cache#"Graph") then return computeLCJI(X); 
@@ -347,4 +353,21 @@ computeLCJI(ToricModel) := Ideal => X -> (
     X.cache#"LC" = I;
     I
 )
+
+LCRing = method()
+LCRing(Ideal, Ring) := Ring => (I,R) -> (
+    u := local u;
+    n := numgens R;
+    S := coefficientRing(R)[gens R, u_1..u_n];
+)
+LCRing(Ideal) := I -> LCRing(I, ring I)
+LCRing(ToricModel) := X -> ( --I should change the methods that use ToricModel to utilize ring X, and to use ideal X, so that it embeds into the LCRing
+    p := local p;
+    u := local u;
+    A := X.cache#"mat";
+    if A === null then error "Matrix A is not defined in the cache of x";
+
+    numcol := numColumns(A);
+    X.cache.CoefficientRing[p_1..p_numcol, u_1..u_numcol, Degrees => {numcol:{1,0}, numcol:{0,1}}]
+) 
 
