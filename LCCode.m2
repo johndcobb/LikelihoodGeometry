@@ -312,6 +312,7 @@ I1 == I2
 
 
 --Code for Example 4.7:
+needsPackage "Quasidegrees"
 A = matrix{{1,1,0,0,0,0,0,0},{0,0,1,1,0,0,0,0},{0,0,0,0,1,1,0,0},{0,0,0,0,0,0,1,1},{1,0,0,0,1,0,0,0},{0,1,0,0,0,1,0,0},{0,0,1,0,0,0,1,0},{0,0,0,1,0,0,0,1},{1,0,1,0,0,0,0,0},{0,1,0,1,0,0,0,0},{0,0,0,0,1,0,1,0},{0,0,0,0,0,1,0,1}}
 I1 = computeToricLC(A) --generate the ideal using the toric method
 isPrime I1 -- confirm that the ideal is prime and therefore is the Likelihood ideal 
@@ -324,6 +325,8 @@ I2 = toricIdeal(A,R) + minors(2,A*M)
 isSubset(I2,I1) --confirm that I2 is a subset of I1
 isSubset(I1,I2) --As we see I1 is not contained in I2
 I1 == I2 -- indeed they are not equal
+
+
 
 
 --Let us see what additional generators are introduced during saturation
