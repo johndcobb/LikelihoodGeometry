@@ -103,20 +103,11 @@ isCompleteGraph(Graph) := Boolean => G -> (
 )
 
 --------------------------------------------------------------------
------ Basic features of the ToricModels datatype
+----- Basic features of the toricModel constructor
 --------------------------------------------------------------------
-ToricModel = new Type of NormalToricVariety
-ToricModel.synonym = "toric model"
-ToricModel.GlobalAssignHook = globalAssignFunction
-ToricModel.GlobalReleaseHook = globalReleaseFunction
-expression ToricModel := X -> if hasAttribute (X, ReverseDictionary) 
-    then expression getAttribute (X, ReverseDictionary) else 
-    (describe X)#0
-texMath ToricModel := X -> texMath expression X
-describe ToricModel := X -> Describe (expression toricModel) (expression rays X, expression max X)
 
 toricModel = method (
-    TypicalValue => ToricModel,
+    TypicalValue => NormalToricVariety,
     Options => {
     	CoefficientRing   => KK,
     	MinimalGenerators => false,
@@ -124,25 +115,18 @@ toricModel = method (
 	}
     )
 toricModel Matrix := opts -> vertices -> (
-    X := new ToricModel from normalToricVariety vertices;
+    X := normalToricVariety vertices;
     X.cache#"mat" = vertices;
     X
 )
-toricModel Graph := opts -> G -> (
-    A := makeLogLinearMatrix G;
-    X := new ToricModel from normalToricVariety A;
-    X.cache#"mat" = A;   
-    X.cache#"Graph" = G;
-    X
-)
 
--*toricModel Graph := NormalToricVariety => opts -> G -> (
+toricModel Graph := NormalToricVariety => opts -> G -> (
     A := makeLogLinearMatrix G;
     X := normalToricVariety A;
     X.cache#"mat" = A;
     X.cache#"Graph" = G;
     X
-)*-
+)
 
 --------------------------------------------------------------------
 ----- Basic features of the DiscreteRandomVariable datatype
@@ -265,7 +249,7 @@ variance List := List => L -> (
 )
 
 --------------------------------------------------------------------
------ Methods utilizing ToricModels and DiscreteRandomVariables
+----- Methods utilizing NormalToricVariet and DiscreteRandomVariables
 --------------------------------------------------------------------
 
 computeLC = method()
@@ -293,13 +277,11 @@ computeLC(Ideal, Ring) := Ideal => (I,R) -> ( -- this works for arbitrary ideals
     L := saturate(f(I) + minors(codim(I)+2,Jaug),H+(f(Q)));
     L)
 computeLC(Ideal) := I -> computeLC(I, ring I)
-computeLC(ToricModel) := Ideal => X -> (
+computeLC(NormalToricVariety) := Ideal => X -> (
     if member("LC", keys X.cache) then return X.cache#"LC"; -- check if its already been computed
     if member("Graph", keys X.cache) and isJointlyIndependent(X.cache#"Graph") then return computeLCJI(X); 
     p := local p;
     u := local u;
-    numcol := local numcol;
-    M := local M;
     -- Retrieve matrix A from the cache
     A := X.cache#"mat";
     if A === null then error "Matrix A is not defined in the cache of x";
@@ -321,7 +303,7 @@ computeLC(ToricModel) := Ideal => X -> (
 )
 
 computeLCJI = method()
-computeLCJI(ToricModel) := Ideal => X -> (
+computeLCJI(NormalToricVariety) := Ideal => X -> (
     G := X.cache#"Graph";
     if isJointlyIndependent(G) != true then error "--expected the graph to be jointly independent";
     p := local p;
@@ -361,7 +343,7 @@ LCRing(Ideal, Ring) := Ring => (I,R) -> (
     S := coefficientRing(R)[gens R, u_1..u_n];
 )
 LCRing(Ideal) := I -> LCRing(I, ring I)
-LCRing(ToricModel) := X -> ( --I should change the methods that use ToricModel to utilize ring X, and to use ideal X, so that it embeds into the LCRing
+LCRing(NormalToricVariety) := X -> ( --I should change the methods that use NormalToricVariety to utilize ring X, and to use ideal X, so that it embeds into the LCRing
     p := local p;
     u := local u;
     A := X.cache#"mat";

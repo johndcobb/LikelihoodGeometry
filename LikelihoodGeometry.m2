@@ -22,7 +22,6 @@ newPackage("LikelihoodGeometry",
 
 export{
     -- Types
-    "ToricModel",
     "DiscreteRandomVariable",
     -- Functions/Methods
     "discreteRandomVariable",
