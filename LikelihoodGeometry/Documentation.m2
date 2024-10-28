@@ -36,9 +36,13 @@ SeeAlso
 *-
 
 undocumented {
-  (describe, ToricModel),
-  (texMath, ToricModel),
-  (expression, ToricModel)
+  (describe, DiscreteRandomVariable),
+  (texMath, DiscreteRandomVariable),
+  (expression, DiscreteRandomVariable),
+  (net, DiscreteRandomVariable),
+  (toString, DiscreteRandomVariable),
+  (isWellDefined, DiscreteRandomVariable),
+  [discreteRandomVariable, Variable]
 }
 
 
@@ -57,7 +61,7 @@ Description
 doc ///
 Key 
   LCRing
-  (LCRing, ToricModel)
+  (LCRing, NormalToricVariety)
   (LCRing, Ideal)
   (LCRing, Ideal, Ring)
 Headline
@@ -66,7 +70,7 @@ Usage
   LCRing(X)
   LCRing(I)
 Inputs
-  X: ToricModel
+  X: NormalToricVariety
   I: Ideal
     the vanishing ideal of a toric model
 Outputs
@@ -88,7 +92,7 @@ SeeAlso
 doc ///
 Key
   computeLC
-  (computeLC, ToricModel)
+  (computeLC, NormalToricVariety)
   (computeLC, Ideal)
   (computeLC, Ideal, Ring)
 Headline
@@ -97,7 +101,7 @@ Usage
   computeLC(X)
   computeLC(I)
 Inputs
-  X: ToricModel
+  X: NormalToricVariety
   I: Ideal
     the vanishing ideal of a toric model
 Outputs
@@ -127,6 +131,9 @@ Key
   toricModel
   (toricModel, Graph)
   (toricModel, Matrix)
+  [toricModel, CoefficientRing]
+  [toricModel, MinimalGenerators]
+  [toricModel, Variable]
 Headline  
   Constructs a toric model from a graph or a matrix
 Usage
@@ -137,8 +144,16 @@ Inputs
     a graph representing an undirected graphical model, with vertices defined by @TO DiscreteRandomVariable@s.
   A: Matrix
     the defining matrix of the toric variety of the toric model; each column is the lattice vartex of the polytope.
+  MinimalGenerators => Boolean 
+	    that specifies whether to compute minimal generators
+  Variable => Symbol 
+	    that specifies the @TO2(baseName, "base name")@ for the indexed
+	    variables in the total coordinate ring
+  CoefficientRing => Ring 
+	    that specifies the coefficient ring of the 
+	    @TO2((ring, NormalToricVariety), "total coordinate ring")@
 Outputs
-  X: ToricModel
+  X: NormalToricVariety
     the toric model defined by the graph or matrix
 Description
   Text
@@ -284,7 +299,7 @@ Inputs
   L: List
     a list of integers specifying the type of rational normal scroll
 Outputs
-  X: ToricModel
+  X: NormalToricVariety
     the rational normal scroll defined by the list of integers
 Description
   Text
@@ -302,7 +317,18 @@ Headline
   the class of all toric models
 Description
   Text
-    A toric model is a discrete statistical model defined by a toric variety, including all hierarchical log-linear models and undirected graphical models. ToricModel subclasses @TO NormalToricVariety@ by adding the attributes $\texttt{arity}$ and $\texttt{pmf}$, which stores the arity of the discrete random variable and its probability mass function.
+    Hierarchical log--linear models are a class of toric models. Let $\mc{X} = [d_1] \times \cdots \times [d_n]$ denote the joint state space of the discrete random variables $X_1,\dots, X_n$. A \textit{hierarchical log--linear model} (or simply \textit{log--linear model}) is defined by a collection $S = \{G_1,\dots, G_g\}$ of non-empty subsets of $L = \{X_1,\dots, X_n\}$ called \textit{generators}. This function takes these two inputs and constructs the defining matrix of the hierarchical log--linear model as a toric variety, where the columns are the lattice vertices of the polytope of the toric variety.
+  Example
+    a = discreteRandomVariable 2; b = discreteRandomVariable 2; c = discreteRandomVariable 2;
+    S = {{a,b}, {b,c}};
+    L = {a,b,c};
+    makeLogLinearMatrix(S,L)
+  Text
+    One can also pass in a graph $G$ to give the defining matrix for the corresponding undirected graphical model, which is the log--linear model on $X$ in which the generators are cliques (maximal complete subgraphs) of $\mc{G}$.
+  Example
+    a = discreteRandomVariable 2; b = discreteRandomVariable 3;
+    G = graph{{a,b}};
+    makeLogLinearMatrix(G)
 SeeAlso
   toricModel
 ///
