@@ -128,6 +128,52 @@ toricModel Graph := NormalToricVariety => opts -> G -> (
     X
 )
 
+toricModel Ideal := NormalToricVariety => opts -> I -> (
+-- does not check if ideal is toric!!
+    A := toricPolytope I;
+    X := normalToricVariety A;
+    X.cache#"mat" = A;
+    X
+)
+
+
+toricIdeal = method()
+toricIdeal(Matrix,Ring) := (A,R) -> (
+    m := product gens R;
+    saturate(sub(toBinomial(transpose(syz(A)),R),R),m)
+    )
+toricIdeal(Matrix) := A -> (
+    numcol := numColumns(A);
+    p := local p;
+    R := KK[p_0..p_(numcol-1)];
+    toricIdeal(A,R)
+)
+toricIdeal(NormalToricVariety) := X -> (
+    A := X.cache#"mat";
+    numcol := numColumns(A);
+    p := local p;
+    R := X.cache.CoefficientRing[p_0..p_(numcol-1)];
+    toricIdeal(A, R)
+)
+toricIdeal(Graph) := G -> toricIdeal(toricModel G)
+
+-- The next two functions are from SlackIdeals.m2
+fromBinomial = b -> (
+    -- INPUT: binomial b
+    -- OUTPUT: kernel vector of exponents of b
+    -- does not check binomiality, if b has >2 terms the exponent vector of the first two will be returned
+    E := exponents(b);
+    E_0 - E_1
+)
+
+toricPolytope = method()
+toricPolytope Ideal := Matrix => I -> (
+    -- INPUT: toric ideal I
+    -- OUTPUT: matrix whose columns represent the vector configuration with toric ideal I
+    K := for f in flatten entries gens I list fromBinomial(f);
+    transpose LLL syz matrix K
+)
+
 --------------------------------------------------------------------
 ----- Basic features of the DiscreteRandomVariable datatype
 --------------------------------------------------------------------
@@ -260,7 +306,7 @@ computeLC(Ideal, Ring) := Ideal => (I,R) -> ( -- this works for arbitrary ideals
     pmat := local pmat;
     umat := local umat;
     n := numgens R;
-    S := coefficientRing(R)[gens R, u_1..u_n];
+    S := LCRing(I,R);
     varList := for i from 0 to #(gens R) -1 list S_i;
     varList2 := for i from 0 to #(gens R) -1 list 1_S;
     f := map(S,R,varList);
@@ -275,6 +321,7 @@ computeLC(Ideal, Ring) := Ideal => (I,R) -> ( -- this works for arbitrary ideals
     H := ideal((sum flatten entries pmat)*(product flatten entries pmat));
 
     L := saturate(f(I) + minors(codim(I)+2,Jaug),H+(f(Q)));
+    I.cache#"LC" = L;
     L)
 computeLC(Ideal) := I -> computeLC(I, ring I)
 computeLC(NormalToricVariety) := Ideal => X -> (
@@ -287,7 +334,7 @@ computeLC(NormalToricVariety) := Ideal => X -> (
     if A === null then error "Matrix A is not defined in the cache of x";
 
     numcol := numColumns(A);
-    R := QQ[p_1..p_numcol, u_1..u_numcol, Degrees => {numcol:{1,0}, numcol:{0,1}}];
+    R := LCRing(X);
     toric := toricIdeal(A, R);
     M := reshape(R^numcol, R^2, matrix({gens R}));
     I := toric + minors(2, A * M);
@@ -313,7 +360,7 @@ computeLCJI(NormalToricVariety) := Ideal => X -> (
 
     pvars := for state in allStates list p_(toSequence state);
     uvars := for state in allStates list u_(toSequence state);
-    R := ZZ/32003[pvars, uvars, Degrees => toList(join(#pvars:{1,0}, #uvars:{0,1})) ];
+    R := KK[pvars, uvars, Degrees => toList(join(#pvars:{1,0}, #uvars:{0,1})) ];
 
     matrixList := {};
     for c in connectedComponents G do (
@@ -340,7 +387,7 @@ LCRing = method()
 LCRing(Ideal, Ring) := Ring => (I,R) -> (
     u := local u;
     n := numgens R;
-    S := coefficientRing(R)[gens R, u_1..u_n];
+    coefficientRing(R)[gens R, u_0..u_(n-1)]
 )
 LCRing(Ideal) := I -> LCRing(I, ring I)
 LCRing(NormalToricVariety) := X -> ( --I should change the methods that use NormalToricVariety to utilize ring X, and to use ideal X, so that it embeds into the LCRing
@@ -350,7 +397,7 @@ LCRing(NormalToricVariety) := X -> ( --I should change the methods that use Norm
     if A === null then error "Matrix A is not defined in the cache of x";
 
     numcol := numColumns(A);
-    X.cache.CoefficientRing[p_1..p_numcol, u_1..u_numcol, Degrees => {numcol:{1,0}, numcol:{0,1}}]
+    X.cache.CoefficientRing[p_0..p_(numcol-1), u_0..u_(numcol-1), Degrees => {numcol:{1,0}, numcol:{0,1}}]
 ) 
 
 MLdegree = method();
@@ -375,6 +422,27 @@ MLdegree(NormalToricVariety) := (X) -> (
 
     X.cache#"MLD"
 );
+MLdegree(Ideal) := X -> (
+    if member("MLD", keys X.cache) then return X.cache#"MLD"; -- check if its already been computed
+    if not member("LC", keys X.cache) then (
+        computeLC(X);
+    );
+    curLC := X.cache#"LC";
+    
+    -- Return the cached "LC" value
+    curVars := vars ring curLC;
+    numVars := numColumns(curVars);
+    numVars2 := numVars//2;
+    use ring curLC;
+    randu := for i from 0 to (numVars2-1) list random(numVars2*20);
+    useVars := for i from 0 to (numVars2-1) list curVars_i_0;
+    curR := QQ[useVars];
+    useVars3 := for i from 0 to (numVars2-1) list (vars curR)_i_0;
+    specmap := map(curR, ring curLC, join(useVars3, randu));
+    X.cache#"MLD" = degree (specmap curLC);
+
+    X.cache#"MLD"
+)
 
 --------------------------------------------------------------------
 ----- Basic constructions
