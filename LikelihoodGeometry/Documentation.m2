@@ -42,7 +42,8 @@ undocumented {
   (net, DiscreteRandomVariable),
   (toString, DiscreteRandomVariable),
   (isWellDefined, DiscreteRandomVariable),
-  [discreteRandomVariable, Variable]
+  [discreteRandomVariable, Variable],
+  fromBinomial
 }
 
 
@@ -53,9 +54,9 @@ Headline
   Methods for computing likelihood geometry of discrete statistical models
 Description
   Text
-    We show a possible workflow using this package. 
+    This package provides methods for computing the likelihood geometry of discrete statistical models. It includes functions for constructing toric models from undirected graphical models, computing the likelihood correspondence, and finding the maximum likelihood degree of a toric model, as described in @HREF"https://arxiv.org/abs/2312.08501"@.
   Text
-    That's all for now!
+    The package also includes functions for constructing rational normal scrolls and hierarchical log-linear models as toric varieties. It provides methods for sampling from discrete random variables, computing their mean, and finding their possible states.
 ///
 
 doc ///
@@ -131,6 +132,7 @@ Key
   toricModel
   (toricModel, Graph)
   (toricModel, Matrix)
+  (toricModel, Ideal)
   [toricModel, CoefficientRing]
   [toricModel, MinimalGenerators]
   [toricModel, Variable]
@@ -139,11 +141,14 @@ Headline
 Usage
   toricModel(G)
   toricModel(A)
+  toricModel(I)
 Inputs
   G: Graph
     a graph representing an undirected graphical model, with vertices defined by @TO DiscreteRandomVariable@s.
   A: Matrix
     the defining matrix of the toric variety of the toric model; each column is the lattice vartex of the polytope.
+  I: Ideal
+    the vanishing ideal of a toric model
   MinimalGenerators => Boolean 
 	    that specifies whether to compute minimal generators
   Variable => Symbol 
@@ -162,6 +167,8 @@ Description
     a = discreteRandomVariable 2; b = discreteRandomVariable 3;
     G = graph{{a,b}};
     toricModel G
+Caveat
+  This method does not check if the ideal is a toric ideal.
 SeeAlso
   computeLC
   LCRing
@@ -368,6 +375,7 @@ doc ///
 Key
   MLdegree
   (MLdegree, NormalToricVariety)
+  (MLdegree, Ideal)
 Headline
   Computes the maximum likelihood degree of a toric model
 Usage
@@ -388,3 +396,68 @@ Description
 SeeAlso
   toricModel
 ///
+
+doc ///
+Key
+  toricIdeal
+  (toricIdeal, Matrix, Ring)
+  (toricIdeal, Matrix)
+  (toricIdeal, NormalToricVariety)
+  (toricIdeal, Graph)
+Headline
+  Constructs the vanishing ideal of a toric model
+Usage
+  toricIdeal(A, R)
+  toricIdeal(A)
+  toricIdeal(X)
+  toricIdeal(G)
+Inputs
+  A: Matrix
+    the defining matrix of the toric variety of the toric model; each column is the lattice vartex of the polytope.
+  R: Ring
+    the ambient ring of the toric model
+  X: NormalToricVariety
+    the toric model
+  G: Graph
+    a graph representing an undirected graphical model
+Outputs
+  I: Ideal
+    the vanishing ideal of the toric model
+Description
+  Text
+    The function toricIdeal constructs the vanishing ideal of a toric model $\mathcal{M}\subseteq \mathbb{P}^n_p$ from the defining matrix $A$ and the coefficient ring $R$. It also works with the toric model $X$ or the graph $G$ representing the undirected graphical model.
+  Example
+    a = discreteRandomVariable 2; b = discreteRandomVariable 3;
+    G = graph{{a,b}};
+    X = toricModel G;
+    toricIdeal(X)
+SeeAlso
+  toricModel
+///
+
+doc /// 
+Key
+  toricPolytope
+  (toricPolytope, Ideal)
+Headline
+  Constructs the toric polytope of a toric ideal (as a matrix)
+Usage
+  toricPolytope(I)
+Inputs
+  I: Ideal
+    the vanishing ideal of a toric model
+Outputs
+  A: Matrix
+    the toric polytope of the toric ideal
+Description
+  Text
+    The function toricPolytope constructs the toric polytope of a toric ideal $\mathcal{I}$, i.e. the matrix whose columns are the lattice vertices of the polytope of $\mathcal{I}$.
+  Example
+    R = QQ[p_0,p_1,p_2];
+    M = ideal(4*p_0*p_2-p_1^2);
+    A = toricPolytope(M)
+SeeAlso
+  toricIdeal
+  toricModel
+///
+
