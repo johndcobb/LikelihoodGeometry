@@ -15,8 +15,8 @@ newPackage("LikelihoodGeometry",
     },
     Headline => "Methods for computing likelihood geometry of discrete statistical models",
     Keywords => {"Commutative Algebra, Algebraic Statistics, Discrete Statistical Models, Likelihood Geometry"},
-    PackageExports => {"GraphicalModels"},
-    PackageImports => {"Elimination", "Quasidegrees", "NormalToricVarieties"},
+    PackageExports => {"GraphicalModels", "LLLBases"},
+    PackageImports => {"Elimination", "NormalToricVarieties"},
     DebuggingMode => true --turn to false when submitting
     )
 
@@ -32,6 +32,7 @@ export{
     "mean",
     "sample",
     "MLdegree",
+    "toricPolytope",
     -- Constructions
     "rationalNormalScroll",
     "makeLogLinearMatrix"
