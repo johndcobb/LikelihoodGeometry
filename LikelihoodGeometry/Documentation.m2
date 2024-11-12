@@ -178,19 +178,23 @@ doc ///
 Key
   discreteRandomVariable
   (discreteRandomVariable, ZZ)
+  (discreteRandomVariable, ZZ, FunctionClosure)
 Headline
   Constructs a discrete random variable
 Usage
   discreteRandomVariable(n)
+  discreteRandomVariable(n, p)
 Inputs
   n: ZZ
     the number of states of the discrete random variable
+  p: FunctionClosure
+    a probability mass function of the discrete random variable
 Outputs
   X: DiscreteRandomVariable
     the discrete random variable with $n$ states
 Description
   Text
-    The function discreteRandomVariable constructs a discrete random variable with $n$ states.
+    The function discreteRandomVariable constructs a discrete random variable with $n$ states with probability mass function $p$. If $p$ is not provided, the probability mass function is uniform.
   Example
     discreteRandomVariable 2
 SeeAlso

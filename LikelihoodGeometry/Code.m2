@@ -148,6 +148,10 @@ toricIdeal(Matrix) := A -> (
     R := KK[p_0..p_(numcol-1)];
     toricIdeal(A,R)
 )
+toricIdeal(NormalToricVariety, Ring) := Ideal => (X,R) -> (
+    A := X.cache#"mat";
+    toricIdeal(A,R)
+)
 toricIdeal(NormalToricVariety) := X -> (
     A := X.cache#"mat";
     numcol := numColumns(A);
@@ -206,14 +210,18 @@ discreteRandomVariable = method (
     }
 )
 
-discreteRandomVariable ZZ := opts -> d -> (
+discreteRandomVariable(ZZ, FunctionClosure) := opts -> (d,f) -> (
     if d < 1 then error "--expected a positive integer";
-    g := x -> if x > 0 and x <= d then 1/d else 0;
     new DiscreteRandomVariable from {
         symbol arity => d,
         symbol cache => new CacheTable,
-        symbol pmf => g
+        symbol pmf => f
     }
+)
+discreteRandomVariable ZZ := opts -> d -> (
+    if d < 1 then error "--expected a positive integer";
+    g := x -> if x > 0 and x <= d then 1/d else 0;
+    discreteRandomVariable(d,g)
 )
 
 isWellDefined DiscreteRandomVariable := Boolean => X -> (
@@ -257,7 +265,7 @@ sample = method()
 sample DiscreteRandomVariable := ZZ => X -> (
         cdf := accumulate(plus, 0, apply(states X, i -> X.pmf(i)));
         randomRR := random(0.0,1.0);
-        return position(cdf, x -> x > randomRR)
+        return position(cdf, x -> x > randomRR)+1
 )
 sample(DiscreteRandomVariable, ZZ) := ZZ => (X, n) -> (
     for i in 1..n list sample X
@@ -324,7 +332,7 @@ computeLC(Ideal, Ring) := Ideal => (I,R) -> ( -- this works for arbitrary ideals
     I.cache#"LC" = L;
     L)
 computeLC(Ideal) := I -> computeLC(I, ring I)
-computeLC(NormalToricVariety) := Ideal => X -> (
+computeLC(NormalToricVariety, Ring) := Ideal => (X,R) -> (
     if member("LC", keys X.cache) then return X.cache#"LC"; -- check if its already been computed
     if member("Graph", keys X.cache) and isJointlyIndependent(X.cache#"Graph") then return computeLCJI(X); 
     p := local p;
@@ -334,13 +342,12 @@ computeLC(NormalToricVariety) := Ideal => X -> (
     if A === null then error "Matrix A is not defined in the cache of x";
 
     numcol := numColumns(A);
-    R := LCRing(X);
     toric := toricIdeal(A, R);
     M := reshape(R^numcol, R^2, matrix({gens R}));
     I := toric + minors(2, A * M);
     pprod := product entries M_0;
     psum := sum entries M_0;
-    L := saturate(I, psum); -- haven't saturated by coordinate hyperplanes
+    L := saturate(I, psum*pprod^0);
 
     -- Cache the computed "LC" value
     X.cache#"LC" = L;
@@ -348,6 +355,7 @@ computeLC(NormalToricVariety) := Ideal => X -> (
     -- Return the cached "LC" value
     L
 )
+computeLC(NormalToricVariety) := Ideal => X -> computeLC(X, LCRing(X))
 
 computeLCJI = method()
 computeLCJI(NormalToricVariety) := Ideal => X -> (
