@@ -204,7 +204,8 @@ toString DiscreteRandomVariable := X -> toString expression X
 net DiscreteRandomVariable := net @@ expression
 
 discreteRandomVariable = method (
-    TypicalValue => DiscreteRandomVariable
+    TypicalValue => DiscreteRandomVariable,
+    Options => {}
 )
 
 discreteRandomVariable(ZZ, FunctionClosure) := opts -> (d,f) -> (
