@@ -10,8 +10,9 @@ newPackage("LikelihoodGeometry",
     Version => "0.1",
     Date => "4 September 2024",
     Authors => {
-	{Name => "John Cobb", Email => "jcobb2@wisc.edu", HomePage => "https://johndcobb.github.io"}
-    --Add your information here.
+	{Name => "John Cobb", Email => "jdcobb3@gmail.com", HomePage => "https://johndcobb.github.io"},
+    {Name => "Matthew Faust", Email => "mfaust@msu.edu", HomePage => "https://mattfaust.github.io"},
+    {Name => "David Barnhill", Email => "barnhill@usna.edu", HomePage => " "}
     },
     Headline => "Methods for computing likelihood geometry of discrete statistical models",
     Keywords => {"Commutative Algebra, Algebraic Statistics, Discrete Statistical Models, Likelihood Geometry"},
