@@ -42,7 +42,6 @@ undocumented {
   (net, DiscreteRandomVariable),
   (toString, DiscreteRandomVariable),
   (isWellDefined, DiscreteRandomVariable),
-  [discreteRandomVariable, Variable],
   fromBinomial
 }
 
@@ -94,6 +93,7 @@ doc ///
 Key
   computeLC
   (computeLC, NormalToricVariety)
+  (computeLC, NormalToricVariety, Ring)
   (computeLC, Ideal)
   (computeLC, Ideal, Ring)
 Headline
@@ -172,6 +172,7 @@ Caveat
 SeeAlso
   computeLC
   LCRing
+  toricIdeal
 ///
 
 doc ///
@@ -407,6 +408,7 @@ Key
   (toricIdeal, Matrix, Ring)
   (toricIdeal, Matrix)
   (toricIdeal, NormalToricVariety)
+  (toricIdeal, NormalToricVariety, Ring)
   (toricIdeal, Graph)
 Headline
   Constructs the vanishing ideal of a toric model
@@ -437,6 +439,7 @@ Description
     toricIdeal(X)
 SeeAlso
   toricModel
+  toricPolytope
 ///
 
 doc /// 
