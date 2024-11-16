@@ -28,6 +28,7 @@ export{
     "LCRing",
     "computeLC",
     "toricModel",
+    "toricIdeal",
     "states",
     "mean",
     "sample",
