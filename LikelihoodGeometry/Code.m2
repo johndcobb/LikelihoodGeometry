@@ -136,7 +136,7 @@ toricModel Ideal := NormalToricVariety => opts -> I -> (
     X
 )
 
-
+-- This function implementation is from Quasidegrees.m2
 toricIdeal = method()
 toricIdeal(Matrix,Ring) := (A,R) -> (
     m := product gens R;
