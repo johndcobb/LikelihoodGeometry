@@ -16,7 +16,7 @@ newPackage("LikelihoodGeometry",
     },
     Headline => "Methods for computing likelihood geometry of discrete statistical models",
     Keywords => {"Commutative Algebra, Algebraic Statistics, Discrete Statistical Models, Likelihood Geometry"},
-    PackageExports => {"GraphicalModels", "LLLBases"},
+    PackageExports => {"GraphicalModels", "LLLBases", "FourTiTwo"},
     PackageImports => {"Elimination", "NormalToricVarieties"},
     DebuggingMode => true --turn to false when submitting
     )
