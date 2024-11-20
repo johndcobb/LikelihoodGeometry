@@ -468,3 +468,34 @@ SeeAlso
   toricModel
 ///
 
+doc ///
+Key
+  variance
+  (variance, DiscreteRandomVariable)
+  (variance, List)
+Headline
+  Compute the variance of discrete random variables
+Usage
+  variance(X)
+  variance(L)
+Inputs
+  X: DiscreteRandomVariable
+  L: List
+    a list of discrete random variables
+Outputs
+  v: RR
+    the variance of the discrete random variable(s)
+Description
+  Text
+    The function variance computes the variance of a @TO DiscreteRandomVariable@. Applying it to a list of discrete random variables will find the variance of each one separately. This is done according to the probability mass function attached to the discrete random variables, which is uniform by default.
+  Example
+    a = discreteRandomVariable 2; b = discreteRandomVariable 3;
+    variance(a)
+    variance({a,b})
+SeeAlso
+  discreteRandomVariable
+  (states, DiscreteRandomVariable)
+  (sample, DiscreteRandomVariable)
+  (mean, DiscreteRandomVariable)
+///
+

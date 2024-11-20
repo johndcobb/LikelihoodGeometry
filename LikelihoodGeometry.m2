@@ -33,6 +33,7 @@ export{
     "states",
     "mean",
     "sample",
+    "variance",
     "MLdegree",
     "toricPolytope",
     -- Constructions
