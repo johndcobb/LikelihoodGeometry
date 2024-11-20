@@ -204,11 +204,10 @@ toString DiscreteRandomVariable := X -> toString expression X
 net DiscreteRandomVariable := net @@ expression
 
 discreteRandomVariable = method (
-    TypicalValue => DiscreteRandomVariable,
-    Options => {}
+    TypicalValue => DiscreteRandomVariable
 )
 
-discreteRandomVariable(ZZ, FunctionClosure) := opts -> (d,f) -> (
+discreteRandomVariable(ZZ, FunctionClosure) := (d,f) -> (
     if d < 1 then error "--expected a positive integer";
     new DiscreteRandomVariable from {
         symbol arity => d,
@@ -216,7 +215,7 @@ discreteRandomVariable(ZZ, FunctionClosure) := opts -> (d,f) -> (
         symbol pmf => f
     }
 )
-discreteRandomVariable ZZ := opts -> d -> (
+discreteRandomVariable ZZ := d -> (
     if d < 1 then error "--expected a positive integer";
     g := x -> if x > 0 and x <= d then 1/d else 0;
     discreteRandomVariable(d,g)
