@@ -22,7 +22,8 @@ g = new HashTable from {
 };
 f = x -> if g#?x then g#x else 0;
 Y = discreteRandomVariable(3, f)
-{states Y, mean Y, sample(Y,2)}
+assert isWellDefined Y;
+{states Y, mean Y, sample(Y,2), variance Y}
 ///
 
 -- test 2
@@ -69,3 +70,23 @@ S = {{a,b}, {b,c}};
 L = {a,b,c};
 makeLogLinearMatrix(S,L)
 ///
+
+-- test 7
+TEST /// 
+a = discreteRandomVariable(2); b = discreteRandomVariable(2); c = discreteRandomVariable(3); d = discreteRandomVariable(3); e = discreteRandomVariable(2); f = discreteRandomVariable(2);
+G = graph({a,b,c,d,e,f}, matrix{{0,0,0,0,0,0},{0,0,1,0,0,0},{0,1,0,0,0,0},{0,0,0,0,1,1},{0,0,0,1,0,1},{0,0,0,1,1,0}});
+X = toricModel(G);
+R = LCRing(X)
+L = computeLC(X,R);
+///
+
+-- test 8
+TEST ///
+S = rationalNormalScroll({1,2,3})
+R = LCRing(S)
+L = computeLC(S,LCRing(S))
+assert(MLdegree(S) == 3)
+///
+
+
+
