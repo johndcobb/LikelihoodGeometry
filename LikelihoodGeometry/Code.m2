@@ -304,14 +304,14 @@ variance List := List => L -> (
 --------------------------------------------------------------------
 
 computeLC = method()
-computeLC(Ideal, Ring) := Ideal => (I,R) -> ( -- this works for arbitrary ideals, but can be very slow
+computeLC(Ideal, Ring) := Ideal => (I,S) -> ( -- this works for arbitrary ideals, but can be very slow
     U := local U;
     d := local d;
     u := local u;
     pmat := local pmat;
     umat := local umat;
+    R := ring I;
     n := numgens R;
-    S := LCRing(I,R);
     varList := for i from 0 to #(gens R) -1 list S_i;
     varList2 := for i from 0 to #(gens R) -1 list 1_S;
     f := map(S,R,varList);
@@ -328,7 +328,7 @@ computeLC(Ideal, Ring) := Ideal => (I,R) -> ( -- this works for arbitrary ideals
     L := saturate(f(I) + minors(codim(I)+2,Jaug),H*(f(Q)));
     I.cache#"LC" = L;
     L)
-computeLC(Ideal) := I -> computeLC(I, ring I)
+computeLC(Ideal) := I -> computeLC(I, LCRing(I))
 computeLC(NormalToricVariety, Ring) := Ideal => (X,R) -> (
     if member("LC", keys X.cache) then return X.cache#"LC"; -- check if its already been computed
     if member("Graph", keys X.cache) and isJointlyIndependent(X.cache#"Graph") then return computeLCJI(X); 
