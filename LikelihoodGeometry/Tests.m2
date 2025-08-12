@@ -75,7 +75,7 @@ TEST ///
 a = discreteRandomVariable(2); b = discreteRandomVariable(2); c = discreteRandomVariable(3); d = discreteRandomVariable(3); e = discreteRandomVariable(2); f = discreteRandomVariable(2);
 G = graph({a,b,c,d,e,f}, matrix{{0,0,0,0,0,0},{0,0,1,0,0,0},{0,1,0,0,0,0},{0,0,0,0,1,1},{0,0,0,1,0,1},{0,0,0,1,1,0}});
 X = toricModel(G);
-R = LCRing(X)
+R = LCRing(X);
 L = computeLC(X,R);
 ///
 
@@ -87,3 +87,13 @@ L = computeLC(S,LCRing(S))
 assert(MLdegree(S) == 3)
 ///
 
+
+--test 9
+TEST ///
+A= matrix{{1,1,1},{1,2,3}};
+X = toricModel(A)
+L = computeLC(X)
+I = computeLC(toricIdeal(X))
+phi = map(ring L, ring I, gens ring L)
+assert(L == phi(I))
+///
