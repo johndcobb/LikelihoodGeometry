@@ -122,6 +122,8 @@ Description
     R := QQ[x,y,z,w];
     I := ideal(x*z-y*w);
     computeLC(I)
+Caveat 
+  Correctness of the algorithm used for a NormalToricVariety is guaranteed as long as the output is prime, which is conjectured to always be true
 SeeAlso
   LCRing
   toricModel
@@ -290,8 +292,9 @@ Description
   Text
     The function states returns a list of possible states of a discrete random variable. Applying it to a list of discrete random variables returns all possible joint states of the variables.
   Example
-    a = discreteRandomVariable 2; b = discreteRandomVariable 3;
-    states(b)
+    a = discreteRandomVariable 2; 
+    b = discreteRandomVariable 3;
+    states({b})
     states({a,b})
 SeeAlso
   discreteRandomVariable
