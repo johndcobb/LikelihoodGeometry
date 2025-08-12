@@ -300,11 +300,11 @@ variance List := List => L -> (
 )
 
 --------------------------------------------------------------------
------ Methods utilizing NormalToricVariet and DiscreteRandomVariables
+----- Methods utilizing NormalToricVariety and DiscreteRandomVariables
 --------------------------------------------------------------------
 
 computeLC = method()
-computeLC(Ideal, Ring) := Ideal => (I,R) -> ( -- this works for arbitrary ideals
+computeLC(Ideal, Ring) := Ideal => (I,R) -> ( -- this works for arbitrary ideals, but can be very slow
     U := local U;
     d := local d;
     u := local u;
@@ -316,7 +316,7 @@ computeLC(Ideal, Ring) := Ideal => (I,R) -> ( -- this works for arbitrary ideals
     varList2 := for i from 0 to #(gens R) -1 list 1_S;
     f := map(S,R,varList);
     J := (matrix {varList2}) || transpose(f jacobian(I));
-    Q := minors(codim(I)+1,jacobian(I));
+    Q := minors(codim(I),jacobian(I));
 
     U = reshape(S^n,S^2,matrix{gens S});
     pmat = transpose(matrix{U_0});
@@ -325,7 +325,7 @@ computeLC(Ideal, Ring) := Ideal => (I,R) -> ( -- this works for arbitrary ideals
 
     H := ideal((sum flatten entries pmat)*(product flatten entries pmat));
 
-    L := saturate(f(I) + minors(codim(I)+2,Jaug),H+(f(Q)));
+    L := saturate(f(I) + minors(codim(I)+2,Jaug),H*(f(Q)));
     I.cache#"LC" = L;
     L)
 computeLC(Ideal) := I -> computeLC(I, ring I)
@@ -344,7 +344,7 @@ computeLC(NormalToricVariety, Ring) := Ideal => (X,R) -> (
     I := toric + minors(2, A * M);
     pprod := product entries M_0;
     psum := sum entries M_0;
-    L := saturate(I, psum*pprod^0);
+    L := saturate(I, psum); --- need to further saturate by pprod if L ends up not being prime. We conjecture this does not happen.
 
     -- Cache the computed "LC" value
     X.cache#"LC" = L;
@@ -354,6 +354,8 @@ computeLC(NormalToricVariety, Ring) := Ideal => (X,R) -> (
 )
 computeLC(NormalToricVariety) := Ideal => X -> computeLC(X, LCRing(X))
 
+
+--The following code computes the likelihood correspondence in the case that the ideal comes from a joint independence model
 computeLCJI = method()
 computeLCJI(NormalToricVariety) := Ideal => X -> (
     G := X.cache#"Graph";
