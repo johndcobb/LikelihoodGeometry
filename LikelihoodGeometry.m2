@@ -72,12 +72,9 @@ end
 uninstallPackage "LikelihoodGeometry";
 restart
 debug installPackage "LikelihoodGeometry"
---check LikelihoodGeometryf
+--check LikelihoodGeometry
 debug needsPackage "LikelihoodGeometry";
 
-a = discreteRandomVariable 2;
-b = discreteRandomVariable 3;
-c = discreteRandomVariable 4;
 
 G = graph({{a,b}, {b,c}})
 X = toricModel G
