@@ -79,15 +79,15 @@ toricModel = method (
     	Variable          => getSymbol "x"
 	}
     )
-toricModel Matrix := opts -> vertices -> (
-    X := normalToricVariety vertices;
+toricModel Matrix := NormalToricVariety => opts -> vertices -> (
+    X := normalToricVariety(vertices, opts);
     X.cache#"mat" = vertices;
     X
 )
 
 toricModel Graph := NormalToricVariety => opts -> G -> (
     A := makeLogLinearMatrix G;
-    X := normalToricVariety A;
+    X := normalToricVariety(A, opts);
     X.cache#"mat" = A;
     X.cache#"Graph" = G;
     X
@@ -96,18 +96,13 @@ toricModel Graph := NormalToricVariety => opts -> G -> (
 toricModel Ideal := NormalToricVariety => opts -> I -> (
 -- does not check if ideal is toric!!
     A := toricPolytope I;
-    X := normalToricVariety A;
+    X := normalToricVariety(A, opts);
     X.cache#"mat" = A;
     X
 )
 
--- This function implementation is from Quasidegrees.m2
-toricIdeal = method()
-toricIdeal(Matrix,Ring) := (A,R) -> (
-    m := product gens R;
-    saturate(sub(toBinomial(transpose(syz(A)),R),R),m)
-    )
-toricIdeal(Matrix) := A -> (
+-- Extend the toricIdeal method exported by Quasidegrees with model constructors.
+toricIdeal(Matrix) := Ideal => A -> (
     numcol := numColumns(A);
     p := local p;
     R := KK[p_0..p_(numcol-1)];
@@ -117,31 +112,14 @@ toricIdeal(NormalToricVariety, Ring) := Ideal => (X,R) -> (
     A := X.cache#"mat";
     toricIdeal(A,R)
 )
-toricIdeal(NormalToricVariety) := X -> (
+toricIdeal(NormalToricVariety) := Ideal => X -> (
     A := X.cache#"mat";
     numcol := numColumns(A);
     p := local p;
     R := X.cache.CoefficientRing[p_0..p_(numcol-1)];
     toricIdeal(A, R)
 )
-toricIdeal(Graph) := G -> toricIdeal(toricModel G)
-
--- The next two functions are from SlackIdeals.m2
-fromBinomial = b -> (
-    -- INPUT: binomial b
-    -- OUTPUT: kernel vector of exponents of b
-    -- does not check binomiality, if b has >2 terms the exponent vector of the first two will be returned
-    E := exponents(b);
-    E_0 - E_1
-)
-
-toricPolytope = method()
-toricPolytope Ideal := Matrix => I -> (
-    -- INPUT: toric ideal I
-    -- OUTPUT: matrix whose columns represent the vector configuration with toric ideal I
-    K := for f in flatten entries gens I list fromBinomial(f);
-    transpose LLL syz matrix K
-)
+toricIdeal(Graph) := Ideal => G -> toricIdeal(toricModel G)
 
 --------------------------------------------------------------------
 ----- Basic features of the DiscreteRandomVariable datatype
@@ -154,25 +132,25 @@ DiscreteRandomVariable.GlobalReleaseHook = globalReleaseFunction
 arity = method()
 arity DiscreteRandomVariable := ZZ => X -> X.arity
 
-expression DiscreteRandomVariable := X -> (
+expression DiscreteRandomVariable := Thing => X -> (
     if hasAttribute (X, ReverseDictionary) 
     then expression getAttribute (X, ReverseDictionary) else 
     (describe X)
 )
-texMath DiscreteRandomVariable := X -> texMath expression X
-describe DiscreteRandomVariable := X -> (
+texMath DiscreteRandomVariable := String => X -> texMath expression X
+describe DiscreteRandomVariable := Net => X -> (
     myOutput := {net "arity => " | net X.arity};
     horizontalJoin flatten ("{", stack myOutput, "}")
 )
-toString DiscreteRandomVariable := X -> toString expression X
+toString DiscreteRandomVariable := String => X -> toString expression X
 
-net DiscreteRandomVariable := net @@ expression
+net DiscreteRandomVariable := Thing => net @@ expression
 
 discreteRandomVariable = method (
     TypicalValue => DiscreteRandomVariable
 )
 
-discreteRandomVariable(ZZ, FunctionClosure) := (d,f) -> (
+discreteRandomVariable(ZZ, FunctionClosure) := DiscreteRandomVariable => (d,f) -> (
     if d < 1 then error "--expected a positive integer";
     new DiscreteRandomVariable from {
         symbol arity => d,
@@ -180,7 +158,7 @@ discreteRandomVariable(ZZ, FunctionClosure) := (d,f) -> (
         symbol pmf => f
     }
 )
-discreteRandomVariable ZZ := d -> (
+discreteRandomVariable ZZ := DiscreteRandomVariable => d -> (
     if d < 1 then error "--expected a positive integer";
     g := x -> if x > 0 and x <= d then 1/d else 0;
     discreteRandomVariable(d,g)
@@ -229,20 +207,20 @@ sample DiscreteRandomVariable := ZZ => X -> (
         randomRR := random(0.0,1.0);
         return position(cdf, x -> x > randomRR)+1
 )
-sample(DiscreteRandomVariable, ZZ) := ZZ => (X, n) -> (
+sample(DiscreteRandomVariable, ZZ) := List => (X, n) -> (
     for i in 1..n list sample X
 )
 sample List := List => L -> (
     if all(L, x -> class x === DiscreteRandomVariable) != true then error "--expected a list of DiscreteRandomVariables";
     apply(L, x -> sample x)
 )
-sample(List, ZZ) := (L, n) -> (
+sample(List, ZZ) := List => (L, n) -> (
     if all(L, x -> class x === DiscreteRandomVariable) != true then error "--expected a list of DiscreteRandomVariables";
     for i in 1..n list sample L
 )
 
 mean = method()
-mean DiscreteRandomVariable := RR => X -> (
+mean DiscreteRandomVariable := Number => X -> (
     pmfs := apply(states X, i -> X.pmf(i));
     sum(pack(2,mingle(pmfs, states X)) / product)
 )
@@ -253,7 +231,7 @@ mean List := List => L -> (
 )
 
 variance = method()
-variance DiscreteRandomVariable := RR => X -> (
+variance DiscreteRandomVariable := Number => X -> (
     pmfs := apply(states X, i -> X.pmf(i));
     X2 := apply(states X, i -> i^2);
     sum(pack(2,mingle(pmfs, X2)) / product) - (mean X)^2
@@ -285,7 +263,7 @@ computeLC(Ideal, Ring) := Ideal => (I,S) -> ( -- Algorithm 6 of Hosten--Khetan--
     L := saturate(f(I) + ideal(matrix{uvars}*f(K)),H*f(Q));
     I.cache#"LC" = L;
     L)
-computeLC(Ideal) := I -> computeLC(I, LCRing(I))
+computeLC(Ideal) := Ideal => I -> computeLC(I, LCRing(I))
 computeLC(NormalToricVariety, Ring) := Ideal => (X,R) -> (
     if member("LC", keys X.cache) and ring(X.cache#"LC") === R then return X.cache#"LC";
     if member("Graph", keys X.cache) and isJointlyIndependent(X.cache#"Graph") then return computeLCJI(X,R);
@@ -348,8 +326,8 @@ LCRing(Ideal, Ring) := Ring => (I,R) -> (
     n := numgens R;
     coefficientRing(R)[gens R, u_0..u_(n-1), MonomialOrder => Lex]
 )
-LCRing(Ideal) := I -> LCRing(I, ring I)
-LCRing(NormalToricVariety) := X -> (
+LCRing(Ideal) := Ring => I -> LCRing(I, ring I)
+LCRing(NormalToricVariety) := Ring => X -> (
     p := local p;
     u := local u;
     A := X.cache#"mat";
@@ -360,7 +338,7 @@ LCRing(NormalToricVariety) := X -> (
 ) 
 
 MLdegree = method();
-MLdegree(NormalToricVariety) := (X) -> (
+MLdegree(NormalToricVariety) := ZZ => (X) -> (
     -- Joint independence models have a unique generic maximum likelihood estimate
     if member("Graph", keys X.cache) and isJointlyIndependent(X.cache#"Graph") then (
         X.cache#"MLD" = 1;
@@ -384,7 +362,7 @@ MLdegree(NormalToricVariety) := (X) -> (
 
     X.cache#"MLD"
 );
-MLdegree(Ideal) := X -> (
+MLdegree(Ideal) := ZZ => X -> (
     if member("MLD", keys X.cache) then return X.cache#"MLD"; -- check if its already been computed
     if not member("LC", keys X.cache) then (
         computeLC(X);

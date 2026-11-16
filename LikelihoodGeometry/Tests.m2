@@ -231,3 +231,64 @@ expected = matrix{
     {0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1}};
 assert(makeLogLinearMatrix G == expected);
 ///
+
+-- test 14: declared and actual return types agree for sampling and statistics
+TEST ///
+X = discreteRandomVariable 2;
+Y = discreteRandomVariable(2, i -> if i == 1 then 0.25 else 0.75);
+assert(typicalValues#(sample, DiscreteRandomVariable) === ZZ);
+assert(typicalValues#(sample, DiscreteRandomVariable, ZZ) === List);
+assert(typicalValues#(sample, List, ZZ) === List);
+assert(typicalValues#(mean, DiscreteRandomVariable) === Number);
+assert(typicalValues#(variance, DiscreteRandomVariable) === Number);
+assert(instance(sample X, ZZ));
+assert(instance(sample(X, 3), List));
+assert(sample(X, 0) === {});
+assert(sample({X,Y}, 0) === {});
+assert(all(sample({X,Y}, 3), row -> #row == 2 and all(row, s -> instance(s, ZZ))));
+assert(class(mean X) === QQ and mean X == 3/2);
+assert(class(variance X) === QQ and variance X == 1/4);
+assert(instance(mean Y, RR) and abs(mean Y - 7/4) < 1e-9);
+assert(instance(variance Y, RR) and abs(variance Y - 3/16) < 1e-9);
+assert(instance(mean {X,Y}, List) and instance(variance {X,Y}, List));
+///
+
+-- test 15: all toric model constructors honor their documented options
+TEST ///
+needsPackage "NormalToricVarieties";
+A = matrix{{0,1,0,1,2},{0,0,1,1,0}};
+X = toricModel(A, MinimalGenerators => true, CoefficientRing => ZZ/101, Variable => symbol z);
+assert(isWellDefined X);
+assert(coefficientRing ring X === ZZ/101);
+assert(toString first gens ring X == "z_0");
+assert(X.cache#"mat" == A);
+a = discreteRandomVariable 2; b = discreteRandomVariable 2;
+Y = toricModel(graph({a,b}, {}), CoefficientRing => ZZ/101, Variable => symbol z);
+R = QQ[p_0..p_2];
+Z = toricModel(ideal(p_0*p_2-p_1^2), CoefficientRing => ZZ/101, Variable => symbol z);
+scan({X,Y,Z}, model -> (
+    assert(model.cache.Variable === symbol z);
+    assert(coefficientRing LCRing model === ZZ/101);
+    assert(coefficientRing ring toricIdeal model === ZZ/101)
+));
+///
+
+-- test 16: reuse dependency implementations without shadowing the Graphs API
+TEST ///
+assert(toricIdeal === value Quasidegrees.Dictionary#"toricIdeal");
+assert(toricPolytope === value SlackIdeals.Dictionary#"toricPolytope");
+assert(realpath(first locate lookup(toricIdeal, Matrix, Ring)) == realpath(Quasidegrees#"source file"));
+assert(realpath(first locate lookup(toricPolytope, Ideal)) == realpath(SlackIdeals#"source file"));
+assert(graph === value Graphs.Dictionary#"graph");
+assert(Graph === value Graphs.Dictionary#"Graph");
+A = matrix{{1,1,1},{0,1,2}};
+R = QQ[p_0..p_2];
+I = ideal(p_0*p_2-p_1^2);
+assert(toricIdeal(A, R) == I);
+assert(toricIdeal(toricPolytope I, R) == I);
+a = discreteRandomVariable 2; b = discreteRandomVariable 2;
+G = graph({a,b}, {});
+assert(instance(G, Graph));
+assert(numColumns makeLogLinearMatrix G == 4);
+assert(MLdegree toricModel G == 1);
+///

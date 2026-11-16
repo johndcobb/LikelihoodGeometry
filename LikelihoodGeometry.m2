@@ -1,24 +1,25 @@
 ---------------------------------------------------------------------------
--- PURPOSE : Create methods for computing facts relating to likelihood geometry --           of discrete statistical models.
---           
+-- PURPOSE : Compute the likelihood geometry of discrete statistical models.
 -- PROGRAMMERS : Dave Barnhill, John Cobb, Matthew Faust
 --
--- UPDATE HISTORY : created 7 September 2023 as a part of the IMSI workshop --  --                  "Algebraic Statistics";
+-- Created 7 September 2023 at the IMSI workshop "Algebraic Statistics".
 ---------------------------------------------------------------------------
 newPackage("LikelihoodGeometry",
     AuxiliaryFiles => true,
-    Version => "0.1",
-    Date => "4 September 2024",
+    Version => "0.2",
+    Date => "16 November 2026",
     Authors => {
-	{Name => "John Cobb", Email => "jdcobb3@gmail.com", HomePage => "https://johndcobb.github.io"},
-    {Name => "Matthew Faust", Email => "mfaust@msu.edu", HomePage => "https://mattfaust.github.io"},
-    {Name => "David Barnhill", Email => "barnhill@usna.edu", HomePage => "https://scholar.google.com/citations?user=0PLXk0AAAAAJ&hl=en"}
+        {Name => "John Cobb", Email => "jdcobb3@gmail.com", HomePage => "https://johndcobb.github.io"},
+        {Name => "Matthew Faust", Email => "mfaust@msu.edu", HomePage => "https://mattfaust.github.io"},
+        {Name => "David Barnhill", Email => "barnhill@usna.edu", HomePage => "https://scholar.google.com/citations?user=0PLXk0AAAAAJ&hl=en"}
     },
     Headline => "Methods for computing likelihood geometry of discrete statistical models",
-    Keywords => {"Commutative Algebra, Algebraic Statistics, Discrete Statistical Models, Likelihood Geometry"},
-    PackageExports => {"Graphs", "LLLBases", "FourTiTwo"},
+    HomePage => "https://github.com/johndcobb/LikelihoodGeometry",
+    Keywords => {"Commutative Algebra", "Algebraic Statistics"},
+    -- Graphs must follow SlackIdeals so its graph constructor takes precedence over EdgeIdeals.
+    PackageExports => {"LLLBases", "FourTiTwo", "Quasidegrees", "SlackIdeals", "Graphs"},
     PackageImports => {"Elimination", "NormalToricVarieties"},
-    DebuggingMode => true --turn to false when submitting
+    DebuggingMode => false
     )
 
 export{
@@ -29,18 +30,14 @@ export{
     "LCRing",
     "computeLC",
     "toricModel",
-    "toricIdeal",
     "states",
     "mean",
     "sample",
     "variance",
     "MLdegree",
-    "toricPolytope",
     -- Constructions
     "rationalNormalScroll",
     "makeLogLinearMatrix"
-    -- Symbols
-    -- Helper functions
 }
 protect pmf
 
@@ -49,10 +46,6 @@ baseDirectory = LikelihoodGeometry#"source directory"
 ----- CODE
 --------------------------------------------------------------------
 load(baseDirectory | "LikelihoodGeometry/Code.m2")
---- THINGS TO IMPLEMENT? -- 
--*
-
-*-
 
 --------------------------------------------------------------------
 ----- DOCUMENTATION
@@ -65,44 +58,3 @@ load(baseDirectory | "LikelihoodGeometry/Documentation.m2")
 --------------------------------------------------------------------
 load(baseDirectory | "LikelihoodGeometry/Tests.m2")
 end
-
---------------------------------------------------------------------
------ SCRATCH SPACE
---------------------------------------------------------------------
-uninstallPackage "LikelihoodGeometry";
-restart
-debug installPackage "LikelihoodGeometry"
---check LikelihoodGeometry
-debug needsPackage "LikelihoodGeometry";
-
-
-G = graph({{a,b}, {b,c}})
-X = toricModel G
-Mlist = computeLCJI(X)
-I = computeLCJI(X) 
-J = computeLC(X)
-R = ring(I)
-S = ring(J)
-
-a = discreteRandomVariable 2;
-b = discreteRandomVariable 2;
-c = discreteRandomVariable 2;
-S = {{a,b}, {b,c}};
-L = {a,b,c};
-makeLogLinearMatrix(S,L)
-
-LCRing(toricModel G)
-
-phi = map(R,S, vars R)
-phi(J) == I
-
-
-maxCliques = findMaximalCliques G
-states maxCliques
-makeLogLinearMatrix(maxCliques, vertices G)
-
-S = rationalNormalScroll({1,2,3})
-
-G = graph({1,2,3,4,5,6},{{2,3}, {4,5}, {5,6}, {6,4}})
-C = connectedComponents G
-isJointlyIndependent(G)

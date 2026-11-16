@@ -1,89 +1,66 @@
-
--*
-doc ///
-  Key
-  Headline
-  Usage
-  Inputs
-  Outputs
-  Description
-    Text
-    Example
-  Caveat
-  SeeAlso
-///
-
-doc ///
-Key
-Headline
-Usage
-Inputs
-Outputs
-Consequences
-  Item
-Description
-  Text
-  Example
-  CannedExample
-  Code
-  Pre
-ExampleFiles
-Contributors
-References
-Caveat
-SeeAlso
-///
-*-
-
+-- Standard methods for this type.
 undocumented {
   (describe, DiscreteRandomVariable),
   (texMath, DiscreteRandomVariable),
   (expression, DiscreteRandomVariable),
   (net, DiscreteRandomVariable),
   (toString, DiscreteRandomVariable),
-  (isWellDefined, DiscreteRandomVariable),
-  fromBinomial
+  (isWellDefined, DiscreteRandomVariable)
 }
-
 
 doc ///
 Key
   LikelihoodGeometry
 Headline
-  Methods for computing likelihood geometry of discrete statistical models
+  likelihood geometry of discrete statistical models
 Description
   Text
-    This package provides methods for computing the likelihood geometry of discrete statistical models. It includes functions for constructing toric models from undirected graphical models, computing the likelihood correspondence, and finding the maximum likelihood degree of a toric model, as described in @HREF"https://arxiv.org/abs/2312.08501"@.
+    This package constructs discrete statistical models and computes their likelihood ideals and maximum likelihood degrees. It implements the algorithms for toric models in @HREF"https://arxiv.org/abs/2312.08501"@ and the general algorithm of @HREF"https://arxiv.org/abs/math/0408270"@.
   Text
-    The package also includes functions for constructing rational normal scrolls and hierarchical log-linear models as toric varieties. It provides methods for sampling from discrete random variables, computing their mean, and finding their possible states.
+    @TO Quasidegrees@ supplies @TO (toricIdeal, Matrix, Ring)@, and @TO SlackIdeals@ supplies @TO toricPolytope@.
+SeeAlso
+  toricModel
+  computeLC
+  LCRing
+  MLdegree
+  rationalNormalScroll
+  makeLogLinearMatrix
+  discreteRandomVariable
 ///
 
 doc ///
-Key 
+Key
   LCRing
   (LCRing, NormalToricVariety)
   (LCRing, Ideal)
   (LCRing, Ideal, Ring)
 Headline
-  Constructs the ambient ring of the likelihood correspondence
-Usage 
+  construct the ambient ring of the likelihood correspondence
+Usage
   LCRing(X)
   LCRing(I)
+  LCRing(I, S)
 Inputs
   X: NormalToricVariety
+    a toric model constructed by @TO toricModel@ or @TO rationalNormalScroll@
   I: Ideal
     the homogeneous vanishing ideal of a discrete statistical model
+  S: Ring
+    a polynomial ring for the probability coordinates
 Outputs
   R: Ring
     the ambient ring of the likelihood correspondence
 Description
   Text
-    The function LCRing constructs the ambient ring of the likelihood correspondence of a discrete statistical model $\mathcal{M}\subseteq \mathbb{P}^n_p$, i.e. the coordinate ring of $\mathbb{P}^n_p \times \mathbb{P}^n_u$. It chooses $p_0\dots p_n$ and $u_0 \dots u_n$ as the coordinates of $\mathbb{P}^n_p$ and $\mathbb{P}^n_u$, respectively. For an ideal, the probability coordinates are the generators of its ring. The term order is lexicographic, with all probability coordinates preceding all data coordinates, in the order of the generators. This is the order used for the Groebner basis of a joint independence model.
+    Constructs a polynomial ring in probability coordinates followed by data coordinates, with lexicographic term order. For a toric model, these are $p_0,\ldots,p_n,u_0,\ldots,u_n$, with bidegrees $(1,0)$ and $(0,1)$ respectively. For an ideal, the probability coordinates are the generators of its ring and the output has the default total grading. LCRing(I, S) uses the generators and coefficient ring of S.
   Example
     a = discreteRandomVariable 2; b = discreteRandomVariable 3;
     G = graph{{a,b}};
     X = toricModel G;
     LCRing(X)
+    S = QQ[q_0..q_2];
+    I = ideal(q_0*q_2-q_1^2);
+    LCRing(I, S)
 SeeAlso
   toricModel
   computeLC
@@ -97,7 +74,7 @@ Key
   (computeLC, Ideal)
   (computeLC, Ideal, Ring)
 Headline
-  Computes the likelihood correspondence of a discrete statistical model
+  compute the likelihood correspondence of a discrete statistical model
 Usage
   computeLC(X)
   computeLC(I)
@@ -105,6 +82,7 @@ Usage
   computeLC(I, R)
 Inputs
   X: NormalToricVariety
+    a toric model constructed by @TO toricModel@ or @TO rationalNormalScroll@
   I: Ideal
     the homogeneous prime ideal of a discrete statistical model
   R: Ring
@@ -114,7 +92,7 @@ Outputs
     the vanishing ideal of the likelihood correspondence
 Description
   Text
-    The function computeLC computes the vanishing ideal of the likelihood correspondence of a discrete statistical model $\mathcal{M}\subseteq \mathbb{P}^n_p$. There are three cases. For a joint independence model constructed from a graph whose connected components are complete, it lists the generators directly.
+    Computes the likelihood ideal of a discrete statistical model. For a joint independence model constructed from a graph whose connected components are complete, the generators are given directly.
   Example
     a = discreteRandomVariable 2; b = discreteRandomVariable 2;
     G = graph({a,b}, {});
@@ -123,7 +101,7 @@ Description
   Text
     To describe these generators, let $C_i$ be a connected component of the graph. The rows of $P_i$ are indexed by states $s$ of the variables in $C_i$, and its columns by states $t$ of the remaining variables. The entry in row $s$ and column $t$ is the probability coordinate $p_{(s,t)}$ of the combined state, with the variable positions restored to their original order. Append the column whose entry in row $s$ is the data marginal $\sum_t u_{(s,t)}$ to obtain $M_i$. Here the subscripts denote joint states; in the returned ring, $p_0,\dots,p_n$ and $u_0,\dots,u_n$ correspond to these states in increasing lexicographic order. The likelihood ideal is generated by the $2$ by $2$ minors of all the matrices $M_i$. With the lexicographic order provided by @TO LCRing@, these minors form a Groebner basis. See Theorem 3.2 and Corollary 3.5 of @HREF"https://arxiv.org/abs/2312.08501"@.
   Text
-    For other toric models, the algorithm uses the defining matrix and saturation. Here is the unscaled conic.
+    For other toric models, the method uses the defining matrix and saturation, as in this example of the unscaled conic.
   Example
     A = matrix{{1,1,1},{0,1,2}};
     X = toricModel A;
@@ -135,8 +113,8 @@ Description
     I = minors(2, matrix{{p_0,p_1,p_2},{p_1,p_2,p_3}});
     computeLC(I)
   Text
-    An optional ambient ring can be supplied, with the probability coordinates first and the data coordinates second. Its term order is preserved; the Groebner basis assertion for joint independence models refers to the default lexicographic order.
-Caveat 
+    A supplied ring must have the probability coordinates first and the data coordinates second. Its term order is preserved. The Groebner basis statement above requires the lexicographic order from @TO LCRing@.
+Caveat
   Correctness of the general toric algorithm used for a NormalToricVariety is guaranteed as long as the output is prime, which is conjectured to always be true. This caveat does not apply to the joint independence algorithm or the method for an ideal.
 SeeAlso
   LCRing
@@ -144,7 +122,7 @@ SeeAlso
 ///
 
 doc ///
-Key 
+Key
   toricModel
   (toricModel, Graph)
   (toricModel, Matrix)
@@ -152,39 +130,41 @@ Key
   [toricModel, CoefficientRing]
   [toricModel, MinimalGenerators]
   [toricModel, Variable]
-Headline  
-  Constructs a toric model from a graph or a matrix
+Headline
+  construct a toric model from a graph, matrix, or ideal
 Usage
   toricModel(G)
   toricModel(A)
   toricModel(I)
 Inputs
   G: Graph
-    a graph representing an undirected graphical model, with vertices defined by @TO DiscreteRandomVariable@s.
+    a graph whose vertices are discrete random variables
   A: Matrix
-    the defining matrix of the toric variety of the toric model; each column is the lattice vartex of the polytope.
+    an integer matrix whose columns give the exponent configuration
   I: Ideal
     the vanishing ideal of a toric model
-  MinimalGenerators => Boolean 
-	    that specifies whether to compute minimal generators
-  Variable => Symbol 
-	    that specifies the @TO2(baseName, "base name")@ for the indexed
-	    variables in the total coordinate ring
-  CoefficientRing => Ring 
-	    that specifies the coefficient ring of the 
-	    @TO2((ring, NormalToricVariety), "total coordinate ring")@
+  MinimalGenerators => Boolean
+    whether to compute the vertices of the convex hull for the underlying normal toric variety; all columns are retained in the statistical model
+  Variable => Symbol
+    the base name of the indexed variables in the total coordinate ring of the normal toric variety
+  CoefficientRing => Ring
+    the coefficient ring used by @TO toricIdeal@ and @TO LCRing@
 Outputs
   X: NormalToricVariety
-    the toric model defined by the graph or matrix
+    the toric model defined by the graph, matrix, or ideal
 Description
   Text
-    The function toricModel constructs a toric model from an undirected graphical models or a matrix where each column is the lattice vertex of the polytope of the toric model. 
+    Constructs a toric model from the maximal cliques of G, the exponent matrix A, or the toric ideal I.
   Example
     a = discreteRandomVariable 2; b = discreteRandomVariable 3;
     G = graph{{a,b}};
     toricModel G
+    A = matrix{{1,1,1},{0,1,2}};
+    toricModel A
+    R = QQ[p_0..p_2];
+    toricModel ideal(p_0*p_2-p_1^2)
 Caveat
-  This method does not check if the ideal is a toric ideal.
+  The ideal constructor uses only exponent differences of generators and does not verify toricity and ignores coefficients. Use @TO computeLC@ directly on a scaled ideal to preserve its coefficients.
 SeeAlso
   computeLC
   LCRing
@@ -197,23 +177,26 @@ Key
   (discreteRandomVariable, ZZ)
   (discreteRandomVariable, ZZ, FunctionClosure)
 Headline
-  Constructs a discrete random variable
+  construct a discrete random variable
 Usage
   discreteRandomVariable(n)
   discreteRandomVariable(n, p)
 Inputs
   n: ZZ
-    the number of states of the discrete random variable
+    a positive integer giving the number of states, labeled 1 through n
   p: FunctionClosure
-    a probability mass function of the discrete random variable
+    a function on integer state labels returning nonnegative numerical probabilities that sum to one
 Outputs
   X: DiscreteRandomVariable
     the discrete random variable with $n$ states
 Description
   Text
-    The function discreteRandomVariable constructs a discrete random variable with $n$ states with probability mass function $p$. If $p$ is not provided, the probability mass function is uniform.
+    Constructs a random variable on $1,\ldots,n$ with probability mass function p. The default distribution is uniform.
   Example
     discreteRandomVariable 2
+    discreteRandomVariable(3, i -> if i == 2 then 1 else 0)
+Caveat
+  The supplied probability mass function is not checked for nonnegativity or total mass one.
 SeeAlso
   (states, DiscreteRandomVariable)
   (sample, DiscreteRandomVariable)
@@ -228,7 +211,7 @@ Key
   (sample, List)
   (sample, List, ZZ)
 Headline
-  Take samples from a discrete random variable
+  sample discrete random variables
 Usage
   sample(X)
   sample(X, n)
@@ -236,67 +219,71 @@ Usage
   sample(L, n)
 Inputs
   X: DiscreteRandomVariable
+    a discrete random variable
   L: List
-    a discrete random variable or a list of discrete random variables
+    discrete random variables
   n: ZZ
-    the number of samples to take
+    a nonnegative number of draws
 Outputs
-  S: ZZ
+  s: {ZZ,List}
+    an integer for sample(X), a list for the other forms
 Description
   Text
-    The function sample takes samples from a discrete random variable or a list of discrete random variables. This is done according to the probability mass function attached to the discrete random variables, which is uniform by default. Adding on an integer $n$ will sample the discrete random variable $n$ times.
+    Samples according to each variable's probability mass function. For a list, the variables are sampled independently and the result follows the order of L. The two-argument forms repeat the draw n times; sample(L, n) returns a list of n lists.
   Example
     a = discreteRandomVariable 2; b = discreteRandomVariable 3;
-    sample(a)
+    sample a
+    sample(a, 5)
+    sample {a,b}
     sample({a,b}, 5)
 SeeAlso
   discreteRandomVariable
-  (states, DiscreteRandomVariable)
-  (mean, DiscreteRandomVariable)
+  states
 ///
 
 doc ///
-Key 
+Key
   mean
   (mean, DiscreteRandomVariable)
   (mean, List)
 Headline
-  Compute the mean of discrete random variables
+  compute the mean of discrete random variables
 Usage
   mean(X)
   mean(L)
 Inputs
   X: DiscreteRandomVariable
+    a discrete random variable
   L: List
-    a list of discrete random variables
+    discrete random variables
 Outputs
-  m: RR
-    the mean of the discrete random variable(s)
+  m: {Number,List}
+    the mean of X, or a list of mean values in the order of L
 Description
   Text
-    The function mean computes the mean of a @TO DiscreteRandomVariable@. Applying it to a list of discrete random variables will find the mean of each one separately. This is done according to the probability mass function attached to the discrete random variables, which is uniform by default.
+    Computes the expectation of the integer state labels. Rational probabilities give an exact result.
   Example
     a = discreteRandomVariable 2; b = discreteRandomVariable 3;
-    mean(a)
-    mean({a,b})
+    mean a
+    mean {a,b}
 SeeAlso
   discreteRandomVariable
-  (states, DiscreteRandomVariable)
-  (sample, DiscreteRandomVariable)
+  variance
 ///
 
 doc ///
-Key 
+Key
   states
   (states, DiscreteRandomVariable)
   (states, List)
 Headline
-  Get a list of possible states of discrete random variables
+  get a list of possible states of discrete random variables
 Usage
   states(X)
   states(L)
 Inputs
   X: DiscreteRandomVariable
+    a single discrete random variable
   L: List
     a list of discrete random variables
 Outputs
@@ -304,9 +291,9 @@ Outputs
     a list of possible states of the discrete random variable(s)
 Description
   Text
-    The function states returns a list of possible states of a discrete random variable. Applying it to a list of discrete random variables returns all possible joint states of the variables in increasing lexicographic order.
+    Returns the state labels of X, or the joint states of the variables in a nonempty list L in increasing lexicographic order. A singleton list gives integer labels: states({X}) equals states(X).
   Example
-    a = discreteRandomVariable 2; 
+    a = discreteRandomVariable 2;
     b = discreteRandomVariable 3;
     states({b})
     states({a,b})
@@ -320,19 +307,19 @@ doc ///
 Key
   rationalNormalScroll
   (rationalNormalScroll, List)
-Headline 
-  Constructs a rational normal scroll
+Headline
+  construct a rational normal scroll
 Usage
   rationalNormalScroll(L)
 Inputs
   L: List
-    a list of integers specifying the type of rational normal scroll
+    a nonempty list of positive integers giving the number of coordinates in each block
 Outputs
   X: NormalToricVariety
     the rational normal scroll defined by the list of integers
 Description
   Text
-    From $L=\{a_0+1,\dots, a_k+1\}$, the function rationalNormalScroll constructs the rational normal scroll $S(a_0,\dots, a_k) \subseteq \mathbb{P}^N$ where $N=\sum_{i=0}^k a_i + k$. Thus each entry of L is the number of coordinates in the corresponding block. For example, $S(1,2)$ is defined by the $2$ by $2$ minors of the following matrix.
+    For $L=\{a_0+1,\ldots,a_k+1\}$, constructs the rational normal scroll $S(a_0,\ldots,a_k) \subseteq \mathbb{P}^N$, where $N=\sum_{i=0}^k a_i+k$. Each entry is a block length. For example, the ideal of $S(1,2)$ is given by the following $2$ by $2$ minors.
   Example
     X = rationalNormalScroll {2,3};
     R = QQ[p_0..p_4];
@@ -342,37 +329,35 @@ SeeAlso
   toricModel
 ///
 
-
 doc ///
 Key
   DiscreteRandomVariable
 Headline
-  the class of all discrete random variables
+  the class of finite discrete random variables
 Description
   Text
-    A discrete random variable $X$ is a random variable with a finite number of states. It carries $\texttt{arity}$ and $\texttt{pmf}$, which are the number of states and the probability mass function of $X$, respectively.
+    A discrete random variable has states $1,\ldots,n$ and a probability mass function. Construct one with @TO discreteRandomVariable@. Distinct variables may have the same distribution and serve as separate vertices of a graphical model.
 SeeAlso
   discreteRandomVariable
-  (states, DiscreteRandomVariable)
-  (sample, DiscreteRandomVariable)
-  (mean, DiscreteRandomVariable)
+  states
+  toricModel
 ///
 
 doc ///
-Key 
+Key
   makeLogLinearMatrix
   (makeLogLinearMatrix, Graph)
   (makeLogLinearMatrix, List, List)
 Headline
-  Constructs the defining matrix of a hierarchical log-linear model as a toric variety
+  construct the defining matrix of a hierarchical log-linear model as a toric variety
 Usage
   makeLogLinearMatrix(G)
   makeLogLinearMatrix(S, L)
 Inputs
   G: Graph
-    a graph representing a undirected graphical model
+    a graph representing an undirected graphical model with discrete random variables as vertices
   S: List
-    a set of subsets of L, the generators of the model
+    a nonempty list of nonempty sublists of L, the generators of the model
   L: List
     a list of discrete random variables
 Outputs
@@ -380,14 +365,14 @@ Outputs
     the defining matrix of the hierarchical log-linear model as a toric model
 Description
   Text
-    Hierarchical log-linear models are a class of toric models. Let $\mathcal{X} = [d_1] \times \cdots \times [d_n]$ denote the joint state space of the discrete random variables $X_1,\dots, X_n$. A @EM "hierarchical log-linear model"@ (or simply @EM "log-linear model"@) is defined by a collection $S = \{G_1,\dots, G_g\}$ of non-empty subsets of $L = \{X_1,\dots, X_n\}$ called @EM "generators"@. This function takes these two inputs and constructs the defining matrix of the hierarchical log-linear model as a toric variety, where the columns are the lattice vertices of the polytope of the toric variety.
+    A @EM "hierarchical log-linear model"@ is defined by a collection S of nonempty subsets of the variables in L. The columns of its defining matrix are indexed by joint states of L; the rows by states of each subset in S. An entry is 1 when the joint state restricts to the row state, and 0 otherwise. Joint states follow the order returned by @TO states@.
   Example
     a = discreteRandomVariable 2; b = discreteRandomVariable 2; c = discreteRandomVariable 2;
     S = {{a,b}, {b,c}};
     L = {a,b,c};
     makeLogLinearMatrix(S,L)
   Text
-    One can also pass in a graph $G$ to give the defining matrix for the corresponding undirected graphical model, which is the log-linear model on its vertices in which the generators are maximal cliques (maximal complete subgraphs) of $G$.
+    For a graph G, the generators are its maximal cliques.
   Example
     a = discreteRandomVariable 2; b = discreteRandomVariable 3;
     G = graph{{a,b}};
@@ -402,17 +387,21 @@ Key
   (MLdegree, NormalToricVariety)
   (MLdegree, Ideal)
 Headline
-  Computes the maximum likelihood degree of a toric model
+  compute the maximum likelihood degree of a discrete statistical model
 Usage
   MLdegree(X)
+  MLdegree(I)
 Inputs
   X: NormalToricVariety
+    a toric model constructed by @TO toricModel@ or @TO rationalNormalScroll@
+  I: Ideal
+    the homogeneous prime ideal of a discrete statistical model
 Outputs
   d: ZZ
-    the maximum likelihood degree of the toric model
+    the maximum likelihood degree of the model
 Description
   Text
-    The function MLdegree computes the maximum likelihood degree of a toric model $\mathcal{M}\subseteq \mathbb{P}^n_p$. 
+    For complete and joint independence models constructed from graphs, returns 1 directly.
   Example
     a = discreteRandomVariable 2; b = discreteRandomVariable 3;
     G = graph{{a,b}};
@@ -423,76 +412,118 @@ Description
   Example
     X = toricModel matrix{{1,1,1},{0,1,2}};
     MLdegree(X)
-  Text
-    For a joint independence model constructed from a graph, the degree is $1$ and is returned directly. In general, the degree is computed after specializing the data to random rational values, so the result assumes that this specialization is generic.
 SeeAlso
   toricModel
+Caveat
+  For other models, the method specializes the data to random rational values and assumes the specialization is generic. Use models over QQ. The assumptions of @TO computeLC@ also apply.
 ///
 
 doc ///
 Key
-  toricIdeal
-  (toricIdeal, Matrix, Ring)
   (toricIdeal, Matrix)
-  (toricIdeal, NormalToricVariety)
-  (toricIdeal, NormalToricVariety, Ring)
-  (toricIdeal, Graph)
 Headline
-  Constructs the vanishing ideal of a toric model
+  construct a toric ideal in a new polynomial ring
 Usage
-  toricIdeal(A, R)
   toricIdeal(A)
-  toricIdeal(X)
-  toricIdeal(G)
 Inputs
   A: Matrix
-    the defining matrix of the toric variety of the toric model; each column is the lattice vartex of the polytope.
-  R: Ring
-    the ambient ring of the toric model
-  X: NormalToricVariety
-    the toric model
-  G: Graph
-    a graph representing an undirected graphical model
+    an integer matrix whose columns give the exponent configuration
 Outputs
   I: Ideal
-    the vanishing ideal of the toric model
+    the toric ideal in a polynomial ring over QQ with one variable for each column of A
 Description
   Text
-    The function toricIdeal constructs the vanishing ideal of a toric model $\mathcal{M}\subseteq \mathbb{P}^n_p$ from the defining matrix $A$ and the coefficient ring $R$. It also works with the toric model $X$ or the graph $G$ representing the undirected graphical model.
+    Uses @TO (toricIdeal, Matrix, Ring)@ from @TO Quasidegrees@, with a new ring over QQ.
   Example
     A = matrix{{1,1,1,1},{0,1,2,3}};
-    R = QQ[p_0..p_3];
-    I = toricIdeal(A,R)
-    I == minors(2, matrix{{p_0,p_1,p_2},{p_1,p_2,p_3}})
+    I = toricIdeal A;
+    R = ring I;
+    I == minors(2, matrix{{R_0,R_1,R_2},{R_1,R_2,R_3}})
 SeeAlso
-  toricModel
+  (toricIdeal, Matrix, Ring)
+  "LikelihoodGeometry :: toricIdeal(NormalToricVariety)"
   toricPolytope
 ///
 
-doc /// 
+doc ///
 Key
-  toricPolytope
-  (toricPolytope, Ideal)
+  (toricIdeal, NormalToricVariety, Ring)
 Headline
-  Constructs the toric polytope of a toric ideal (as a matrix)
+  construct the toric ideal of a model in a supplied ring
 Usage
-  toricPolytope(I)
+  toricIdeal(X, R)
 Inputs
-  I: Ideal
-    the vanishing ideal of a toric model
+  X: NormalToricVariety
+    a toric model constructed by @TO toricModel@ or @TO rationalNormalScroll@
+  R: Ring
+    a polynomial ring whose first generators correspond to the columns of the model's defining matrix
 Outputs
-  A: Matrix
-    the toric polytope of the toric ideal
+  I: Ideal
+    the vanishing ideal of the toric model in R
 Description
   Text
-    The function toricPolytope constructs the toric polytope of a toric ideal $\mathcal{I}$, i.e. the matrix whose columns are the lattice vertices of the polytope of $\mathcal{I}$.
+    Uses @TO (toricIdeal, Matrix, Ring)@ on the defining matrix of X. Extra generators of R do not occur in the ideal.
   Example
-    R = QQ[p_0,p_1,p_2];
-    M = ideal(4*p_0*p_2-p_1^2);
-    A = toricPolytope(M)
+    X = toricModel matrix{{1,1,1,1},{0,1,2,3}};
+    R = QQ[p_0..p_3];
+    I = toricIdeal(X, R)
+    I == minors(2, matrix{{p_0,p_1,p_2},{p_1,p_2,p_3}})
 SeeAlso
-  toricIdeal
   toricModel
+  (toricIdeal, Matrix, Ring)
+  "LikelihoodGeometry :: toricIdeal(NormalToricVariety)"
+///
+
+doc ///
+Key
+  (toricIdeal, NormalToricVariety)
+Headline
+  construct the toric ideal of a model in its default ring
+Usage
+  toricIdeal(X)
+Inputs
+  X: NormalToricVariety
+    a toric model constructed by @TO toricModel@ or @TO rationalNormalScroll@
+Outputs
+  I: Ideal
+    the toric ideal in a new polynomial ring over the model's stored coefficient ring
+Description
+  Text
+    Uses a new polynomial ring with one variable per column of the defining matrix of X and the coefficient ring chosen when constructing X.
+  Example
+    X = toricModel(matrix{{1,1,1},{0,1,2}}, CoefficientRing => ZZ/101);
+    I = toricIdeal X
+    coefficientRing ring I
+SeeAlso
+  toricModel
+  "LikelihoodGeometry :: toricIdeal(NormalToricVariety,Ring)"
+///
+
+doc ///
+Key
+  (toricIdeal, Graph)
+Headline
+  construct the toric ideal of an undirected graphical model
+Usage
+  toricIdeal(G)
+Inputs
+  G: Graph
+    a graph whose vertices are discrete random variables
+Outputs
+  I: Ideal
+    the graphical model's toric ideal in a polynomial ring over QQ
+Description
+  Text
+    Computes toricIdeal(toricModel G). Probability coordinates follow the lexicographic order of the joint states.
+  Example
+    a = discreteRandomVariable 2; b = discreteRandomVariable 2;
+    I = toricIdeal graph({a,b}, {});
+    R = ring I;
+    I == ideal(R_0*R_3-R_1*R_2)
+SeeAlso
+  toricModel
+  "LikelihoodGeometry :: toricIdeal(NormalToricVariety)"
+  states
 ///
 
 doc ///
@@ -501,28 +532,26 @@ Key
   (variance, DiscreteRandomVariable)
   (variance, List)
 Headline
-  Compute the variance of discrete random variables
+  compute the variance of discrete random variables
 Usage
   variance(X)
   variance(L)
 Inputs
   X: DiscreteRandomVariable
+    a discrete random variable
   L: List
-    a list of discrete random variables
+    discrete random variables
 Outputs
-  v: RR
-    the variance of the discrete random variable(s)
+  m: {Number,List}
+    the variance of X, or a list of variance values in the order of L
 Description
   Text
-    The function variance computes the variance of a @TO DiscreteRandomVariable@. Applying it to a list of discrete random variables will find the variance of each one separately. This is done according to the probability mass function attached to the discrete random variables, which is uniform by default.
+    Computes the variance of the integer state labels. Rational probabilities give an exact result.
   Example
     a = discreteRandomVariable 2; b = discreteRandomVariable 3;
-    variance(a)
-    variance({a,b})
+    variance a
+    variance {a,b}
 SeeAlso
   discreteRandomVariable
-  (states, DiscreteRandomVariable)
-  (sample, DiscreteRandomVariable)
-  (mean, DiscreteRandomVariable)
+  mean
 ///
-
